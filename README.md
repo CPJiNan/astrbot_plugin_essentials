@@ -52,7 +52,7 @@ class Plugin(Star):
         if not self.permission_api:
             yield event.plain_result("获取权限接口失败，请检查前置插件 Essentials 是否启用。")
             return
-        # 检查消息发送者是否拥有 astrbot 管理员或 essentials.example 权限。
+        # 检查消息发送者是否拥有 AstrBot 管理员或 essentials.example 权限。
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.example",
                                                                                       event.session_id):
