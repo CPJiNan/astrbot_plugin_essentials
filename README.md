@@ -1,5 +1,7 @@
 # astrbot_plugin_essentials
 
+![](./images/cover.png)
+
 一款集成权限、经济、安全、管理功能的 AstrBot 基础插件。
 
 ## 权限模块（permission）
