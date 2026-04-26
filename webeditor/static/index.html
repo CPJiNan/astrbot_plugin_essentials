@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Essentials 权限编辑器</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+<body>
+<!-- 登录界面 -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>身份验证</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="tokenInput">访问令牌</label>
+                <input id="tokenInput" placeholder="请输入访问令牌以继续" type="text">
+            </div>
+            <p id="loginError" style="color: #ef4444; margin-top: 10px; display: none;"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="button button-primary" id="verifyTokenButton">验证</button>
+        </div>
+    </div>
+</div>
+
+<div id="app">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <label for="searchInput"></label>
+            <input id="searchInput" placeholder="搜索用户或权限组" type="text">
+        </div>
+
+        <!-- 标签页栏 -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="users">用户</button>
+            <button class="tab-button" data-tab="groups">权限组</button>
+        </div>
+
+        <!-- 用户列表 -->
+        <div class="list-container" id="userList">
+            <div class="list-header">
+                <span>用户列表</span>
+                <button class="button-icon" id="addUserButton" title="新增用户">+</button>
+            </div>
+            <div class="list-items" id="userListItems"></div>
+        </div>
+
+        <!-- 权限组列表 -->
+        <div class="list-container hidden" id="groupList">
+            <div class="list-header">
+                <span>权限组列表</span>
+                <button class="button-icon" id="addGroupButton" title="新增权限组">+</button>
+            </div>
+            <div class="list-items" id="groupListItems"></div>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 用户视图 -->
+        <div class="view hidden" id="userView">
+            <div class="view-header">
+                <h2 id="userViewTitle">用户</h2>
+                <div class="view-actions">
+                    <button class="button button-danger" id="deleteUserButton">删除用户</button>
+                </div>
+            </div>
+
+            <!-- 属性 -->
+            <div class="card">
+                <h3>属性</h3>
+                <div class="form-group">
+                    <label>ID</label>
+                    <label for="userIdInput"></label>
+                    <input id="userIdInput" readonly type="text">
+                </div>
+            </div>
+
+            <!-- 权限组 -->
+            <div class="card">
+                <h3>权限组</h3>
+                <div class="group-tags" id="userGroupsTags"></div>
+                <div class="add-group-form">
+                    <label for="addUserGroupSelect"></label>
+                    <select id="addUserGroupSelect"></select>
+                    <button class="button button-primary" id="addUserGroupButton">新增权限组</button>
+                </div>
+            </div>
+
+            <!-- 权限 -->
+            <div class="card">
+                <h3>权限</h3>
+                <div class="permission-actions">
+                    <button class="button button-primary" id="addUserPermissionButton">新增权限</button>
+                    <button class="button button-danger" disabled id="deleteSelectedPermissionsButton">删除权限</button>
+                </div>
+                <div class="table-container">
+                    <table class="permission-table" id="userPermissionsTable">
+                        <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <label for="selectAllUserPermissions"></label>
+                                <input id="selectAllUserPermissions" type="checkbox">
+                            </th>
+                            <th>权限节点</th>
+                            <th>值</th>
+                            <th>优先级</th>
+                            <th>来源</th>
+                            <th>过期时间</th>
+                            <th>会话限制</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="userPermissionsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 权限组视图 -->
+        <div class="view hidden" id="groupView">
+            <div class="view-header">
+                <h2 id="groupViewTitle">权限组</h2>
+                <div class="view-actions">
+                    <button class="button button-primary" id="saveGroupButton">保存权限组</button>
+                    <button class="button button-danger" id="deleteGroupButton">删除权限组</button>
+                </div>
+            </div>
+
+            <!-- 属性 -->
+            <div class="card">
+                <h3>属性</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>编辑名</label>
+                        <label for="groupNameInput"></label>
+                        <input id="groupNameInput" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>展示名</label>
+                        <label for="groupDisplayInput"></label>
+                        <input id="groupDisplayInput" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label>权重</label>
+                        <label for="groupWeightInput"></label>
+                        <input id="groupWeightInput" type="number" value="0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 父权限组 -->
+            <div class="card">
+                <h3>父权限组</h3>
+                <div class="group-tags" id="groupParentsTags"></div>
+                <div class="add-group-form">
+                    <label for="addGroupParentSelect"></label>
+                    <select id="addGroupParentSelect"></select>
+                    <button class="button button-primary" id="addGroupParentButton">新增父权限组</button>
+                </div>
+            </div>
+
+            <!-- 权限 -->
+            <div class="card">
+                <h3>权限</h3>
+                <div class="permission-actions">
+                    <button class="button button-primary" id="addGroupPermissionButton">新增权限</button>
+                    <button class="button button-danger" disabled id="deleteSelectedGroupPermissionsButton">删除权限
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="permission-table" id="groupPermissionsTable">
+                        <thead>
+                        <tr>
+                            <th class="checkbox-column">
+                                <label for="selectAllGroupPermissions"></label>
+                                <input id="selectAllGroupPermissions" type="checkbox">
+                            </th>
+                            <th>权限</th>
+                            <th>值</th>
+                            <th>优先级</th>
+                            <th>来源</th>
+                            <th>过期时间</th>
+                            <th>会话限制</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="groupPermissionsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 新增权限 -->
+<div class="modal" id="permissionModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="permissionModalTitle">新增权限</h3>
+            <button class="modal-close" id="closePermissionModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="permissionNodeInput">权限</label>
+                <input id="permissionNodeInput" placeholder="essentials.example" type="text">
+            </div>
+            <div class="form-group">
+                <label for="permissionValueSelect">值</label>
+                <select id="permissionValueSelect">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="permissionPriorityInput">优先级</label>
+                <input id="permissionPriorityInput" type="number" value="0">
+            </div>
+            <div class="form-group">
+                <label for="permissionSourceInput">来源（可选）</label>
+                <input id="permissionSourceInput" type="text">
+            </div>
+            <div class="form-group">
+                <label for="permissionExpiryInput">过期时间（可选）</label>
+                <input id="permissionExpiryInput" type="datetime-local">
+            </div>
+            <div class="form-group">
+                <label for="permissionSessionInput">会话限制（可选）</label>
+                <input id="permissionSessionInput" type="text">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="button" id="cancelPermissionButton">取消</button>
+            <button class="button button-primary" id="confirmPermissionButton">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 新增用户 -->
+<div class="modal" id="addUserModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>新增用户</h3>
+            <button class="modal-close" id="closeAddUserModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="newUserIdInput">ID</label>
+                <input id="newUserIdInput" placeholder="输入用户 ID" type="text">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="button" id="cancelAddUserButton">取消</button>
+            <button class="button button-primary" id="confirmAddUserButton">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 新增权限组 -->
+<div class="modal" id="addGroupModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>新增权限组</h3>
+            <button class="modal-close" id="closeAddGroupModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="newGroupNameInput">编辑名</label>
+                <input id="newGroupNameInput" placeholder="输入权限组编辑名" type="text">
+            </div>
+            <div class="form-group">
+                <label for="newGroupDisplayInput">展示名（可选）</label>
+                <input id="newGroupDisplayInput" placeholder="输入权限组展示名" type="text">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="button" id="cancelAddGroupButton">取消</button>
+            <button class="button button-primary" id="confirmAddGroupButton">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 通知 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/components.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

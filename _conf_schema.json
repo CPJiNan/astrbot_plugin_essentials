@@ -1,0 +1,17 @@
+{
+  "webeditor_enabled": {
+    "description": "是否启用网页编辑器",
+    "type": "bool",
+    "default": true
+  },
+  "webeditor_port": {
+    "description": "网页编辑器端口",
+    "type": "int",
+    "default": 25560
+  },
+  "cache_default_expiry": {
+    "description": "默认缓存过期时间（秒）",
+    "type": "int",
+    "default": 300
+  }
+}
