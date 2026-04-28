@@ -11,7 +11,6 @@ from .webeditor import WebEditor
 class EssentialsPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
-        self.context = context
         self.config = config
         self.permission_api = PermissionAPI(self, self.config)
         self.context.essentials_permission_api = self.permission_api
