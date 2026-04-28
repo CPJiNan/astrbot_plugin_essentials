@@ -14,6 +14,7 @@ class EssentialsPlugin(Star):
         self.context = context
         self.config = config
         self.permission_api = PermissionAPI(self, self.config)
+        self.context.essentials_placeholder_api = self.permission_api
         self.web_editor: Optional[WebEditor] = None
 
     async def initialize(self):
