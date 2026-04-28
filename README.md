@@ -40,13 +40,7 @@ from astrbot.api.star import Context, Star
 class Plugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
-        self.context = context  # 传递插件接口上下文。
-
-    @property
-    def permission_api(self):
-        """获取 Essentials 权限接口"""
-        essentials = self.context.get_registered_star("astrbot_plugin_essentials")
-        return getattr(essentials.star_cls, 'permission_api', None) if essentials else None
+        self.permission_api = getattr(self.context, 'essentials_permission_api', None)
 
     @filter.command("示例命令")
     async def example(self, event: AstrMessageEvent):
