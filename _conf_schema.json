@@ -4,6 +4,11 @@
     "type": "bool",
     "default": true
   },
+  "webeditor_host": {
+    "description": "网页编辑器地址",
+    "type": "str",
+    "default": "127.0.0.1"
+  },
   "webeditor_port": {
     "description": "网页编辑器端口",
     "type": "int",

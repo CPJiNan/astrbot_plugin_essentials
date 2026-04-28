@@ -20,7 +20,11 @@ class EssentialsPlugin(Star):
         await self.permission_api.initialize()
 
         if self.config.get("webeditor_enabled", True):
-            self.web_editor = WebEditor(self.permission_api, port=self.config.get("webeditor_port", 25560))
+            self.web_editor = WebEditor(
+                self.permission_api,
+                host=self.config.get("webeditor_host", "127.0.0.1"),
+                port=self.config.get("webeditor_port", 25560)
+            )
 
         logger.info("插件加载成功。")
 

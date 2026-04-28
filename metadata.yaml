@@ -1,6 +1,6 @@
 name: astrbot_plugin_essentials
 display_name: Essentials
 desc: 一款集成权限、经济、安全、管理功能的 AstrBot 基础插件。
-version: v1.0.0
+version: v1.0.1
 author: 季楠
 repo: https://github.com/CPJiNan/astrbot_plugin_essentials
