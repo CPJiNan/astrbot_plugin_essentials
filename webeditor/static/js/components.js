@@ -157,12 +157,6 @@ const Components = {
         });
     },
 
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    },
-
     formatDate(timestamp) {
         try {
             const date = new Date(timestamp * 1000);
@@ -170,5 +164,5 @@ const Components = {
         } catch {
             return timestamp;
         }
-    },
+    }
 };
