@@ -45,11 +45,17 @@ export const Components = {
         items.forEach(item => {
             const tag = document.createElement('span');
             tag.className = 'group-tag';
-            tag.innerHTML = getTagContent(item);
-            tag.querySelector('.remove-tag').addEventListener('click', (event) => {
+            const {text, dataAttr, dataValue} = getTagContent(item);
+            tag.textContent = text;
+            const button = document.createElement('button');
+            button.className = 'remove-tag';
+            button.textContent = '×';
+            if (dataAttr) button.dataset[dataAttr] = dataValue;
+            button.addEventListener('click', (event) => {
                 event.stopPropagation();
                 onRemove(item);
             });
+            tag.appendChild(button);
             container.appendChild(tag);
         });
     },
@@ -58,7 +64,7 @@ export const Components = {
         this._renderTags(
             container,
             groups,
-            groupName => `${this.escapeHtml(groupName)}<button class="remove-tag" data-group="${this.escapeHtml(groupName)}">&times;</button>`,
+            groupName => ({text: groupName, dataAttr: 'group', dataValue: groupName}),
             groupName => onRemove(userId, groupName)
         );
     },
@@ -67,7 +73,7 @@ export const Components = {
         this._renderTags(
             container,
             parents,
-            parentName => `${this.escapeHtml(parentName)}<button class="remove-tag" data-parent="${this.escapeHtml(parentName)}">&times;</button>`,
+            parentName => ({text: parentName, dataAttr: 'parent', dataValue: parentName}),
             parentName => onRemove(groupName, parentName)
         );
     },
