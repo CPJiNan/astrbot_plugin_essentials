@@ -331,7 +331,7 @@ export const App = {
 
         this.updateUserGroupSelect(user.groups || []);
 
-        Components.clearTable(this.elements.userPermissionsBody);
+        this.elements.userPermissionsBody.innerHTML = '';
         (user.permissions || []).forEach(permission => {
             Components.renderUserPermissionRow(permission, this.elements.userPermissionsBody, this.deleteUserPermission.bind(this));
         });
@@ -395,7 +395,7 @@ export const App = {
 
         this.updateGroupParentSelect(group.parents || []);
 
-        Components.clearTable(this.elements.groupPermissionsBody);
+        this.elements.groupPermissionsBody.innerHTML = '';
         (group.permissions || []).forEach(permission => {
             Components.renderGroupPermissionRow(permission, this.elements.groupPermissionsBody, this.deleteGroupPermission.bind(this));
         });
