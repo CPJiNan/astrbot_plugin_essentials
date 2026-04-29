@@ -7,7 +7,7 @@
  * @author 季楠
  * @since 2026/4/22 21:35
  */
-const API = {
+export const API = {
     baseUrl: '/api',
     _token: null,
 
@@ -40,7 +40,7 @@ const API = {
         const headers = {...extra};
         const token = this.getToken();
         if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+            headers.Authorization = `Bearer ${token}`;
         }
         return headers;
     },

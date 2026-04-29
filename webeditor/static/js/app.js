@@ -1,3 +1,6 @@
+import {API} from './api.js';
+import {Components} from './components.js';
+
 /**
  * Essentials
  * astrbot_plugin_essentials
@@ -7,8 +10,7 @@
  * @author 季楠
  * @since 2026/4/23 20:25
  */
-/*global API, Components*/
-const App = {
+export const App = {
     currentTab: 'users',
     currentUser: null,
     currentGroup: null,
@@ -40,7 +42,7 @@ const App = {
                     await this.loadData();
                     return;
                 }
-            } catch (e) {
+            } catch {
             }
             API.setToken(null);
         }
@@ -334,8 +336,8 @@ const App = {
             Components.renderUserPermissionRow(permission, this.elements.userPermissionsBody, this.deleteUserPermission.bind(this));
         });
 
-        this.elements.userPermissionsBody.querySelectorAll('.permission-checkbox').forEach(callback => {
-            callback.addEventListener('change', () => this.updateDeletePermissionsButton());
+        this.elements.userPermissionsBody.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.updateDeletePermissionsButton());
         });
     },
 
@@ -398,8 +400,8 @@ const App = {
             Components.renderGroupPermissionRow(permission, this.elements.groupPermissionsBody, this.deleteGroupPermission.bind(this));
         });
 
-        this.elements.groupPermissionsBody.querySelectorAll('.group-permission-checkbox').forEach(callback => {
-            callback.addEventListener('change', () => this.updateDeleteGroupPermissionsButton());
+        this.elements.groupPermissionsBody.querySelectorAll('.group-permission-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', () => this.updateDeleteGroupPermissionsButton());
         });
     },
 
@@ -515,7 +517,7 @@ const App = {
     async confirmPermission() {
         const node = document.getElementById('permissionNodeInput').value.trim();
         const value = document.getElementById('permissionValueSelect').value === 'true';
-        const priority = parseInt(document.getElementById('permissionPriorityInput').value) || 0;
+        const priority = parseInt(document.getElementById('permissionPriorityInput').value, 10) || 0;
         const source = document.getElementById('permissionSourceInput').value.trim() || null;
         const expiryInput = document.getElementById('permissionExpiryInput').value;
         const expiry = expiryInput ? Math.floor(new Date(expiryInput).getTime() / 1000) : null;
@@ -565,7 +567,9 @@ const App = {
     },
 
     toggleSelectAll(checked, selector) {
-        this.elements.userPermissionsBody.querySelectorAll(selector).forEach(callback => callback.checked = checked);
+        this.elements.userPermissionsBody.querySelectorAll(selector).forEach(checkbox => {
+            checkbox.checked = checked
+        });
     },
 
     updateDeletePermissionsButton() {
@@ -669,7 +673,7 @@ const App = {
 
         const name = this.elements.groupNameInput.value.trim();
         const display = this.elements.groupDisplayInput.value.trim();
-        const weight = parseInt(this.elements.groupWeightInput.value) || 0;
+        const weight = parseInt(this.elements.groupWeightInput.value, 10) || 0;
 
         if (!name) {
             Components.showToast('权限组编辑名不能为空。', 'error');

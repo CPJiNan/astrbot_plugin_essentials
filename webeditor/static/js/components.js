@@ -1,3 +1,5 @@
+import {App} from "./app";
+
 /**
  * Essentials
  * astrbot_plugin_essentials
@@ -7,7 +9,7 @@
  * @author 季楠
  * @since 2026/4/23 20:45
  */
-const Components = {
+export const Components = {
     _renderListItem(type, id, name, isActive) {
         const div = document.createElement('div');
         div.className = `list-item${isActive ? ' active' : ''}`;
@@ -38,19 +40,27 @@ const Components = {
     },
 
     _renderTags(container, items, getTagContent, onRemove) {
-        container.innerHTML = '';
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
         if (!items?.length) {
-            container.innerHTML = '';
             return;
         }
         items.forEach(item => {
             const tag = document.createElement('span');
             tag.className = 'group-tag';
-            tag.innerHTML = getTagContent(item);
-            tag.querySelector('.remove-tag').addEventListener('click', (event) => {
-                event.stopPropagation();
-                onRemove(item);
-            });
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = getTagContent(item);
+            while (tempDiv.firstChild) {
+                tag.appendChild(tempDiv.firstChild);
+            }
+            const removeButton = tag.querySelector('.remove-tag');
+            if (removeButton) {
+                removeButton.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    onRemove(item);
+                });
+            }
             container.appendChild(tag);
         });
     },
@@ -76,7 +86,12 @@ const Components = {
     _renderPermissionRow(permission, tbody, onDelete, columns) {
         const tr = document.createElement('tr');
         tr.dataset.node = permission.node;
-        tr.innerHTML = columns;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(columns, 'text/html');
+        const nodes = doc.body.children;
+        Array.from(nodes).forEach(node => {
+            tr.appendChild(node.cloneNode(true));
+        });
         tr.querySelector('button').addEventListener('click', () => onDelete(permission.node, permission.session));
         tbody.appendChild(tr);
     },
@@ -150,8 +165,4 @@ const Components = {
             return timestamp;
         }
     },
-
-    clearTable(tbody) {
-        tbody.innerHTML = '';
-    }
 };
