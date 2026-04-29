@@ -1,5 +1,14 @@
 # astrbot_plugin_essentials
 
+![commits](https://img.shields.io/github/commit-activity/t/CPJiNan/astrbot_plugin_essentials)
+![issues](https://img.shields.io/github/issues/CPJiNan/astrbot_plugin_essentials.svg)
+![contributors](https://img.shields.io/github/contributors/CPJiNan/astrbot_plugin_essentials)
+![code-size](https://img.shields.io/github/languages/code-size/CPJiNan/astrbot_plugin_essentials)
+[![codacy](https://app.codacy.com/project/badge/Grade/3d2f153200304f91a4e4b263f37dc461)](https://app.codacy.com/gh/CPJiNan/astrbot_plugin_essentials/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![codefactor](https://www.codefactor.io/repository/github/CPJiNan/astrbot_plugin_essentials/badge)](https://www.codefactor.io/repository/github/CPJiNan/astrbot_plugin_essentials)
+![python](https://img.shields.io/badge/python-3.12+-blue)
+[![deepwiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/CPJiNan/astrbot_plugin_essentials)
+
 ![](./images/cover.png)
 
 一款集成权限、经济、安全、管理功能的 AstrBot 基础插件。
