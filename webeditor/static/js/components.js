@@ -85,52 +85,63 @@ export const Components = {
         );
     },
 
-    _renderPermissionRow(permission, tbody, onDelete, columns) {
+    _renderPermissionRow(permission, tbody, onDelete, type = 'user') {
         const tr = document.createElement('tr');
         tr.dataset.node = permission.node;
-        tr.innerHTML = columns;
-        tr.querySelector('button').addEventListener('click', () => onDelete(permission.node, permission.session));
+
+        const tdCheckbox = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = type === 'user' ? 'user-permission-checkbox' : 'group-permission-checkbox';
+        checkbox.dataset.node = permission.node;
+        checkbox.dataset.session = permission.session || '';
+        tdCheckbox.appendChild(checkbox);
+        tr.appendChild(tdCheckbox);
+
+        const tdNode = document.createElement('td');
+        tdNode.textContent = permission.node;
+        tr.appendChild(tdNode);
+
+        const tdValue = document.createElement('td');
+        tdValue.className = permission.value ? 'permission-value-true' : 'permission-value-false';
+        tdValue.textContent = permission.value ? 'true' : 'false';
+        tr.appendChild(tdValue);
+
+        const tdPriority = document.createElement('td');
+        tdPriority.textContent = permission.priority || 0;
+        tr.appendChild(tdPriority);
+
+        const tdSource = document.createElement('td');
+        tdSource.textContent = permission.source || '-';
+        tr.appendChild(tdSource);
+
+        const tdExpiry = document.createElement('td');
+        tdExpiry.textContent = permission.expiry ? this.formatDate(permission.expiry) : '-';
+        tr.appendChild(tdExpiry);
+
+        const tdSession = document.createElement('td');
+        tdSession.textContent = permission.session || '-';
+        tr.appendChild(tdSession);
+
+        const tdAction = document.createElement('td');
+        const button = document.createElement('button');
+        button.className = 'button button-danger button-small';
+        button.dataset.node = permission.node;
+        button.dataset.session = permission.session || '';
+        button.textContent = '删除';
+        button.addEventListener('click', () => onDelete(permission.node, permission.session));
+        tdAction.appendChild(button);
+        tr.appendChild(tdAction);
+
         tbody.appendChild(tr);
     },
 
     renderUserPermissionRow(permission, tbody, onDelete) {
-        this._renderPermissionRow(
-            permission,
-            tbody,
-            onDelete,
-            `
-                <td><input type="checkbox" class="permission-checkbox" data-node="${this.escapeHtml(permission.node)}" data-session="${this.escapeHtml(permission.session || '')}"></td>
-                <td>${this.escapeHtml(permission.node)}</td>
-                <td class="${permission.value ? 'permission-value-true' : 'permission-value-false'}">${permission.value ? 'true' : 'false'}</td>
-                <td>${permission.priority || 0}</td>
-                <td>${permission.source || '-'}</td>
-                <td>${permission.expiry ? this.formatDate(permission.expiry) : '-'}</td>
-                <td>${permission.session || '-'}</td>
-                <td>
-                    <button class="button button-danger button-small" data-node="${this.escapeHtml(permission.node)}" data-session="${this.escapeHtml(permission.session || '')}">删除</button>
-                </td>
-            `
-        );
+        this._renderPermissionRow(permission, tbody, onDelete, 'user');
     },
 
     renderGroupPermissionRow(permission, tbody, onDelete) {
-        this._renderPermissionRow(
-            permission,
-            tbody,
-            onDelete,
-            `
-                <td><input type="checkbox" class="group-permission-checkbox" data-node="${this.escapeHtml(permission.node)}" data-session="${this.escapeHtml(permission.session || '')}"></td>
-                <td>${this.escapeHtml(permission.node)}</td>
-                <td class="${permission.value ? 'permission-value-true' : 'permission-value-false'}">${permission.value ? 'true' : 'false'}</td>
-                <td>${permission.priority || 0}</td>
-                <td>${permission.source || '-'}</td>
-                <td>${permission.expiry ? this.formatDate(permission.expiry) : '-'}</td>
-                <td>${permission.session || '-'}</td>
-                <td>
-                    <button class="button button-danger button-small" data-node="${this.escapeHtml(permission.node)}" data-session="${this.escapeHtml(permission.session || '')}">删除</button>
-                </td>
-            `
-        );
+        this._renderPermissionRow(permission, tbody, onDelete, 'group');
     },
 
     showToast(message, type = 'success') {

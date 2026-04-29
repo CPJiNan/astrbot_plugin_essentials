@@ -170,7 +170,7 @@ export const App = {
         document.getElementById('deleteSelectedGroupPermissionsButton').addEventListener('click', () => this.deleteSelectedGroupPermissions());
 
         document.getElementById('selectAllUserPermissions').addEventListener('change', (event) => {
-            this.toggleSelectAll(event.target.checked, '.permission-checkbox');
+            this.toggleSelectAll(event.target.checked, '.user-permission-checkbox');
             this.updateDeletePermissionsButton();
         });
         document.getElementById('selectAllGroupPermissions').addEventListener('change', (event) => {
@@ -336,7 +336,7 @@ export const App = {
             Components.renderUserPermissionRow(permission, this.elements.userPermissionsBody, this.deleteUserPermission.bind(this));
         });
 
-        this.elements.userPermissionsBody.querySelectorAll('.permission-checkbox').forEach(checkbox => {
+        this.elements.userPermissionsBody.querySelectorAll('.user-permission-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.updateDeletePermissionsButton());
         });
     },
@@ -573,7 +573,7 @@ export const App = {
     },
 
     updateDeletePermissionsButton() {
-        const checked = this.elements.userPermissionsBody.querySelectorAll('.permission-checkbox:checked').length;
+        const checked = this.elements.userPermissionsBody.querySelectorAll('.user-permission-checkbox:checked').length;
         document.getElementById('deleteSelectedPermissionsButton').disabled = checked === 0;
     },
 
@@ -583,7 +583,7 @@ export const App = {
     },
 
     async deleteSelectedUserPermissions() {
-        const checkboxes = this.elements.userPermissionsBody.querySelectorAll('.permission-checkbox:checked');
+        const checkboxes = this.elements.userPermissionsBody.querySelectorAll('.user-permission-checkbox:checked');
         const permissions = Array.from(checkboxes).map(checkbox => ({
             node: checkbox.dataset.node,
             session: checkbox.dataset.session || null
