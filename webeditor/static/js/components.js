@@ -50,7 +50,14 @@ export const Components = {
             const button = document.createElement('button');
             button.className = 'remove-tag';
             button.textContent = '×';
-            if (dataAttr) button.dataset[dataAttr] = dataValue;
+            switch (dataAttr) {
+                case 'group':
+                    button.dataset.group = dataValue;
+                    break;
+                case 'parent':
+                    button.dataset.parent = dataValue;
+                    break;
+            }
             button.addEventListener('click', (event) => {
                 event.stopPropagation();
                 onRemove(item);
