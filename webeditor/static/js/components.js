@@ -7,6 +7,7 @@
  * @author 季楠
  * @since 2026/4/23 20:45
  */
+/*global App*/
 const Components = {
     _renderListItem(type, id, name, isActive) {
         const div = document.createElement('div');
