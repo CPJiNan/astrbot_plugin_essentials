@@ -191,7 +191,7 @@ const App = {
             await Promise.all([this.loadUsers(), this.loadGroups()]);
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast(`加载数据失败：${e.message}。`, 'error');
+            Components.showToast(`加载数据失败：${e.message}`, 'error');
         }
     },
 
@@ -308,7 +308,7 @@ const App = {
             this.renderUserView();
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast(`加载用户失败：${e.message}。`, 'error');
+            Components.showToast(`加载用户失败：${e.message}`, 'error');
         }
     },
 
@@ -370,7 +370,7 @@ const App = {
             this.renderGroupView();
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast(`加载权限组失败：${e.message}。`, 'error');
+            Components.showToast(`加载权限组失败：${e.message}`, 'error');
         }
     },
 
@@ -432,13 +432,13 @@ const App = {
     async createUser() {
         const userId = document.getElementById('newUserIdInput').value.trim();
         if (!userId) {
-            Components.showToast('请输入用户 ID。', 'error');
+            Components.showToast('请输入用户 ID', 'error');
             return;
         }
 
         try {
             await API.createUser(userId);
-            Components.showToast('用户创建成功。');
+            Components.showToast('用户创建成功');
             this.hideAddUserModal();
             await this.loadUsers();
             this.renderCurrentList();
@@ -455,7 +455,7 @@ const App = {
 
         try {
             await API.deleteUser(this.currentUser.user_id);
-            Components.showToast('用户删除成功。');
+            Components.showToast('用户删除成功');
             this.currentUser = null;
             this.elements.userView.classList.add('hidden');
             await this.loadUsers();
@@ -470,13 +470,13 @@ const App = {
 
         const groupName = this.elements.addUserGroupSelect.value;
         if (!groupName) {
-            Components.showToast('请选择权限组。', 'error');
+            Components.showToast('请选择权限组', 'error');
             return;
         }
 
         try {
             await API.addUserToGroup(this.currentUser.user_id, groupName);
-            Components.showToast('新增用户权限组成功。');
+            Components.showToast('新增用户权限组成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
         } catch (e) {
@@ -487,7 +487,7 @@ const App = {
     async removeUserFromGroup(userId, groupName) {
         try {
             await API.removeUserFromGroup(userId, groupName);
-            Components.showToast('移除用户权限组成功。');
+            Components.showToast('移除用户权限组成功');
             await this.selectUser(userId);
             await this.loadUsers();
         } catch (e) {
@@ -522,18 +522,18 @@ const App = {
         const session = document.getElementById('permissionSessionInput').value.trim() || null;
 
         if (!node) {
-            Components.showToast('请输入权限。', 'error');
+            Components.showToast('请输入权限', 'error');
             return;
         }
 
         try {
             if (this.permissionModalType === 'user') {
                 await API.addUserPermission(this.currentUser.user_id, {node, value, priority, source, expiry, session});
-                Components.showToast('新增用户权限成功。');
+                Components.showToast('新增用户权限成功');
                 await this.selectUser(this.currentUser.user_id);
             } else {
                 await API.addGroupPermission(this.currentGroup.name, {node, value, priority, source, expiry, session});
-                Components.showToast('新增权限组权限成功。');
+                Components.showToast('新增权限组权限成功');
                 await this.selectGroup(this.currentGroup.name);
             }
             this.hidePermissionModal();
@@ -545,7 +545,7 @@ const App = {
     async deleteUserPermission(node, session) {
         try {
             await API.deleteUserPermission(this.currentUser.user_id, node, session);
-            Components.showToast('移除用户权限成功。');
+            Components.showToast('移除用户权限成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
         } catch (e) {
@@ -556,7 +556,7 @@ const App = {
     async deleteGroupPermission(node, session) {
         try {
             await API.deleteGroupPermission(this.currentGroup.name, node, session);
-            Components.showToast('移除权限组权限成功。');
+            Components.showToast('移除权限组权限成功');
             await this.selectGroup(this.currentGroup.name);
             await this.loadGroups();
         } catch (e) {
@@ -591,7 +591,7 @@ const App = {
 
         try {
             await API.deleteUserPermissions(this.currentUser.user_id, permissions);
-            Components.showToast(`已移除用户 ${permissions.length} 个权限。`);
+            Components.showToast(`已移除用户 ${permissions.length} 个权限`);
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
         } catch (e) {
@@ -610,7 +610,7 @@ const App = {
 
         try {
             await API.deleteGroupPermissions(this.currentGroup.name, permissions);
-            Components.showToast(`已移除权限组 ${permissions.length} 个权限。`);
+            Components.showToast(`已移除权限组 ${permissions.length} 个权限`);
             await this.selectGroup(this.currentGroup.name);
             await this.loadGroups();
         } catch (e) {
@@ -633,13 +633,13 @@ const App = {
         const display = document.getElementById('newGroupDisplayInput').value.trim();
 
         if (!name) {
-            Components.showToast('请输入权限组编辑名。', 'error');
+            Components.showToast('请输入权限组编辑名', 'error');
             return;
         }
 
         try {
             await API.createGroup({name, display, weight: 0, parents: [], permissions: []});
-            Components.showToast('权限组创建成功。');
+            Components.showToast('权限组创建成功');
             this.hideAddGroupModal();
             await this.loadGroups();
             this.renderCurrentList();
@@ -656,7 +656,7 @@ const App = {
 
         try {
             await API.deleteGroup(this.currentGroup.name);
-            Components.showToast('权限组删除成功。');
+            Components.showToast('权限组删除成功');
             this.currentGroup = null;
             this.elements.groupView.classList.add('hidden');
             await this.loadGroups();
@@ -674,7 +674,7 @@ const App = {
         const weight = parseInt(this.elements.groupWeightInput.value, 10) || 0;
 
         if (!name) {
-            Components.showToast('权限组编辑名不能为空。', 'error');
+            Components.showToast('权限组编辑名不能为空', 'error');
             return;
         }
 
@@ -686,7 +686,7 @@ const App = {
                 parents: this.currentGroup.parents || [],
                 permissions: this.currentGroup.permissions || []
             });
-            Components.showToast('权限组保存成功。');
+            Components.showToast('权限组保存成功');
             await this.loadGroups();
             if (name !== this.currentGroup.name) {
                 await this.selectGroup(name);
@@ -701,13 +701,13 @@ const App = {
 
         const parentName = this.elements.addGroupParentSelect.value;
         if (!parentName) {
-            Components.showToast('请选择父权限组。', 'error');
+            Components.showToast('请选择父权限组', 'error');
             return;
         }
 
         try {
             await API.addGroupParent(this.currentGroup.name, parentName);
-            Components.showToast('添加父权限组成功。');
+            Components.showToast('新增父权限组成功');
             await this.selectGroup(this.currentGroup.name);
         } catch (e) {
             Components.showToast(e.message, 'error');
@@ -717,7 +717,7 @@ const App = {
     async removeGroupParent(groupName, parentName) {
         try {
             await API.removeGroupParent(groupName, parentName);
-            Components.showToast('移除父权限组成功。');
+            Components.showToast('移除父权限组成功');
             await this.selectGroup(groupName);
         } catch (e) {
             Components.showToast(e.message, 'error');
