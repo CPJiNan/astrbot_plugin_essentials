@@ -40,27 +40,16 @@ export const Components = {
     },
 
     _renderTags(container, items, getTagContent, onRemove) {
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        if (!items?.length) {
-            return;
-        }
+        container.innerHTML = '';
+        if (!items?.length) return;
         items.forEach(item => {
             const tag = document.createElement('span');
             tag.className = 'group-tag';
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = getTagContent(item);
-            while (tempDiv.firstChild) {
-                tag.appendChild(tempDiv.firstChild);
-            }
-            const removeButton = tag.querySelector('.remove-tag');
-            if (removeButton) {
-                removeButton.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    onRemove(item);
-                });
-            }
+            tag.innerHTML = getTagContent(item);
+            tag.querySelector('.remove-tag').addEventListener('click', (event) => {
+                event.stopPropagation();
+                onRemove(item);
+            });
             container.appendChild(tag);
         });
     },
@@ -86,12 +75,7 @@ export const Components = {
     _renderPermissionRow(permission, tbody, onDelete, columns) {
         const tr = document.createElement('tr');
         tr.dataset.node = permission.node;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(columns, 'text/html');
-        const nodes = doc.body.children;
-        Array.from(nodes).forEach(node => {
-            tr.appendChild(node.cloneNode(true));
-        });
+        tr.innerHTML = columns;
         tr.querySelector('button').addEventListener('click', () => onDelete(permission.node, permission.session));
         tbody.appendChild(tr);
     },

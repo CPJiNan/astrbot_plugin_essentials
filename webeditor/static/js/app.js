@@ -193,7 +193,7 @@ export const App = {
             await Promise.all([this.loadUsers(), this.loadGroups()]);
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast('加载数据失败：' + e.message + '。', 'error');
+            Components.showToast(`加载数据失败：${e.message}。`, 'error');
         }
     },
 
@@ -310,7 +310,7 @@ export const App = {
             this.renderUserView();
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast('加载用户失败：' + e.message + '。', 'error');
+            Components.showToast(`加载用户失败：${e.message}。`, 'error');
         }
     },
 
@@ -372,7 +372,7 @@ export const App = {
             this.renderGroupView();
             this.renderCurrentList();
         } catch (e) {
-            Components.showToast('加载权限组失败：' + e.message + '。', 'error');
+            Components.showToast(`加载权限组失败：${e.message}。`, 'error');
         }
     },
 
