@@ -7,6 +7,7 @@
  * @author 季楠
  * @since 2026/4/23 20:25
  */
+/*global API, Components*/
 const App = {
     currentTab: 'users',
     currentUser: null,
