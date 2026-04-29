@@ -5,16 +5,6 @@ from aiohttp import web
 
 
 @web.middleware
-async def cors_middleware(request: web.Request, handler):
-    """CORS 中间件"""
-    response = await handler(request)
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    return response
-
-
-@web.middleware
 async def auth_middleware(request: web.Request, handler):
     """访问令牌验证中间件"""
     path = request.path
@@ -39,7 +29,6 @@ def setup_routes(app: web.Application):
     """注册 API 路由"""
     static_path = Path(__file__).parent / 'static'
 
-    app.middlewares.append(cors_middleware)
     app.middlewares.append(auth_middleware)
 
     app.router.add_static('/static', static_path)

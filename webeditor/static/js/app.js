@@ -1,6 +1,3 @@
-import {API} from './api.js';
-import {Components} from './components.js';
-
 /**
  * Essentials
  * astrbot_plugin_essentials
@@ -10,7 +7,8 @@ import {Components} from './components.js';
  * @author 季楠
  * @since 2026/4/23 20:25
  */
-export const App = {
+/*global API, Components*/
+const App = {
     currentTab: 'users',
     currentUser: null,
     currentGroup: null,

@@ -7,7 +7,7 @@
  * @author 季楠
  * @since 2026/4/22 21:35
  */
-export const API = {
+const API = {
     baseUrl: '/api',
     _token: null,
 
