@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Set
+from typing import Callable, List, Optional, Set, Awaitable
 
 from ..manager.expansion_manager import ExpansionManager
 from ..models.placeholder_expansion import PlaceholderExpansion
@@ -18,7 +18,7 @@ class PlaceholderAPI:
 
     @staticmethod
     def create_expansion(identifier: str, author: str, version: str,
-                         handler: Callable[[str], str]) -> PlaceholderExpansion:
+                         handler: Callable[[str], Awaitable[str]]) -> PlaceholderExpansion:
         """创建占位符拓展"""
 
         class Expansion(PlaceholderExpansion):
@@ -40,8 +40,8 @@ class PlaceholderAPI:
             def version(self) -> str:
                 return self._version
 
-            def on_request(self, params: str) -> str:
-                return self._handler(params)
+            async def on_request(self, params: str) -> str:
+                return await self._handler(params)
 
         return Expansion()
 
@@ -69,9 +69,9 @@ class PlaceholderAPI:
         """检查占位符是否已注册"""
         return self.manager.is_registered(identifier)
 
-    def set_placeholders(self, text: str) -> str:
+    async def set_placeholders(self, text: str) -> str:
         """解析文本中的占位符"""
-        return self.manager.set_placeholders(text)
+        return await self.manager.set_placeholders(text)
 
     def contains_placeholders(self, text: str) -> bool:
         """检查文本中是否包含占位符"""

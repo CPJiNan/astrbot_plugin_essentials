@@ -53,7 +53,7 @@ class ExpansionManager:
         """检查占位符是否已注册"""
         return identifier.lower() in self._expansions
 
-    def set_placeholders(self, text: str) -> str:
+    async def set_placeholders(self, text: str) -> str:
         start = text.find(self.HEAD)
         if start == -1:
             return text
@@ -101,7 +101,7 @@ class ExpansionManager:
                 expansion = self.get_expansion(identifier.lower())
                 if expansion:
                     try:
-                        replacement = expansion.on_request(params)
+                        replacement = await expansion.on_request(params)
                     except Exception:
                         replacement = None
                 else:

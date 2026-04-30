@@ -4,8 +4,8 @@ from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star
 
-from .permission.api import PermissionAPI
-from .placeholder import PlaceholderAPI
+from .permission import PermissionAPI
+from .placeholder import PlaceholderAPI, PermissionExpansion
 from .webeditor import WebEditor
 
 
@@ -22,6 +22,8 @@ class EssentialsPlugin(Star):
     async def initialize(self):
         await self.permission_api.initialize()
         await self.placeholder_api.initialize()
+
+        self.placeholder_api.register(PermissionExpansion(self.permission_api))
 
         if self.config.get("webeditor_enabled", True):
             self.web_editor = WebEditor(

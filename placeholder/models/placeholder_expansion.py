@@ -17,7 +17,7 @@ class PlaceholderExpansion(ABC):
         return "1.0.0"
 
     @abstractmethod
-    def on_request(self, params: str) -> str:
+    async def on_request(self, params: str) -> str:
         pass
 
     def can_register(self) -> bool:
