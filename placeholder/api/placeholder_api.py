@@ -1,7 +1,7 @@
-from typing import List, Optional, Set
+from typing import Callable, List, Optional, Set
 
 from ..manager.expansion_manager import ExpansionManager
-from ..models import PlaceholderExpansion
+from ..models.placeholder_expansion import PlaceholderExpansion
 
 
 class PlaceholderAPI:
@@ -15,6 +15,35 @@ class PlaceholderAPI:
 
     async def terminate(self):
         pass
+
+    @staticmethod
+    def create_expansion(identifier: str, author: str, version: str,
+                         handler: Callable[[str], str]) -> PlaceholderExpansion:
+        """创建占位符拓展"""
+
+        class Expansion(PlaceholderExpansion):
+            def __init__(self):
+                self._identifier = identifier
+                self._author = author
+                self._version = version
+                self._handler = handler
+
+            @property
+            def identifier(self) -> str:
+                return self._identifier
+
+            @property
+            def author(self) -> str:
+                return self._author
+
+            @property
+            def version(self) -> str:
+                return self._version
+
+            def on_request(self, params: str) -> str:
+                return self._handler(params)
+
+        return Expansion()
 
     def register(self, expansion: PlaceholderExpansion) -> bool:
         """注册占位符扩展"""

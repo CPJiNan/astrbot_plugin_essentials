@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Set
 
 from astrbot.api import logger
 
-from ..models import PlaceholderExpansion
+from ..models.placeholder_expansion import PlaceholderExpansion
 
 
 class ExpansionManager:
