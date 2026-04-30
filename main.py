@@ -319,3 +319,19 @@ class EssentialsPlugin(Star):
             yield event.plain_result(f"网页编辑器已在 http://{host}:{port} 上运行。")
         else:
             yield event.plain_result("网页编辑器已关闭。使用 /permission editor start 开启。")
+
+    @filter.command_group("placeholder", alias={'占位符'})
+    def placeholder(self):
+        """占位符命令组"""
+        pass
+
+    @placeholder.command("parse", alias={'p', '解析'})
+    async def placeholder_parse(self, event: AstrMessageEvent, text: str):
+        """解析文本中的占位符"""
+        if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
+                                                                                      "essentials.placeholder.parse",
+                                                                                      event.session_id):
+            yield event.plain_result("无使用当前命令的权限。")
+            return
+        result = await self.placeholder_api.set_placeholders(text)
+        yield event.plain_result(result)
