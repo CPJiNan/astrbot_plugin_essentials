@@ -21,7 +21,7 @@ class ExpansionManager:
             logger.warning(f"注册占位符扩展失败：标识符 {identifier} 无效。")
             return False
         if not expansion.can_register():
-            logger.warning(f"注册占位符扩展失败：占位符 {expansion.name} 未满足注册条件。")
+            logger.warning(f"注册占位符扩展失败：占位符 {identifier} 未满足注册条件。")
             return False
         if identifier in self._expansions:
             logger.warning(f"注册占位符扩展失败：标识符 {identifier} 已存在。")

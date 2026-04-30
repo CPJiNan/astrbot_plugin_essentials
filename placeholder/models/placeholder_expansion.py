@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 
 class PlaceholderExpansion(ABC):
@@ -16,14 +15,6 @@ class PlaceholderExpansion(ABC):
     @property
     def version(self) -> str:
         return "1.0.0"
-
-    @property
-    def name(self) -> str:
-        return self.identifier
-
-    @property
-    def placeholders(self) -> List[str]:
-        return []
 
     @abstractmethod
     def on_request(self, params: str) -> str:
@@ -42,5 +33,5 @@ class PlaceholderExpansion(ABC):
                 and self.version == other.version)
 
     def __repr__(self):
-        return (f"PlaceholderExpansion[name: '{self.name}', "
+        return (f"PlaceholderExpansion[identifier: '{self.identifier}', "
                 f"author: '{self.author}', version: '{self.version}']")
