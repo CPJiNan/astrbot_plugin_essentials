@@ -1,6 +1,8 @@
-from typing import Callable, Dict, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from astrbot.api import logger
+
+from ..models import PlaceholderExpansion
 
 
 class ExpansionManager:
@@ -10,34 +12,46 @@ class ExpansionManager:
     TAIL = '%'
 
     def __init__(self):
-        self._handlers: Dict[str, Callable[[str], Optional[str]]] = {}
+        self._expansions: Dict[str, PlaceholderExpansion] = {}
 
-    def register(self, identifier: str, handler: Callable[[str], Optional[str]]) -> bool:
-        identifier = identifier.lower()
+    def register(self, expansion: PlaceholderExpansion) -> bool:
+        """注册占位符扩展"""
+        identifier = expansion.identifier.lower()
         if not identifier or '_' in identifier:
             logger.warning(f"注册占位符扩展失败：标识符 {identifier} 无效。")
             return False
-        if identifier in self._handlers:
+        if not expansion.can_register():
+            logger.warning(f"注册占位符扩展失败：占位符 {expansion.name} 未满足注册条件。")
+            return False
+        if identifier in self._expansions:
             logger.warning(f"注册占位符扩展失败：标识符 {identifier} 已存在。")
             return False
-        self._handlers[identifier] = handler
+        self._expansions[identifier] = expansion
         return True
 
     def unregister(self, identifier: str) -> bool:
+        """注销占位符扩展"""
         identifier = identifier.lower()
-        if identifier not in self._handlers:
+        if identifier not in self._expansions:
             return False
-        del self._handlers[identifier]
+        del self._expansions[identifier]
         return True
 
-    def get_handler(self, identifier: str) -> Optional[Callable[[str], Optional[str]]]:
-        return self._handlers.get(identifier.lower())
-
     def get_identifiers(self) -> Set[str]:
-        return set(self._handlers.keys())
+        """获取标识符列表"""
+        return set(self._expansions.keys())
+
+    def get_expansion(self, identifier: str) -> Optional[PlaceholderExpansion]:
+        """获取占位符扩展"""
+        return self._expansions.get(identifier.lower())
+
+    def get_expansions(self) -> List[PlaceholderExpansion]:
+        """获取占位符扩展列表"""
+        return list(self._expansions.values())
 
     def is_registered(self, identifier: str) -> bool:
-        return identifier.lower() in self._handlers
+        """检查占位符是否已注册"""
+        return identifier.lower() in self._expansions
 
     def set_placeholders(self, text: str) -> str:
         start = text.find(self.HEAD)
@@ -84,8 +98,14 @@ class ExpansionManager:
                 if underscore + 1 < end:
                     params = text[underscore + 1:end]
 
-                handler = self.get_handler(identifier.lower())
-                replacement = handler(params) if handler else None
+                expansion = self.get_expansion(identifier.lower())
+                if expansion:
+                    try:
+                        replacement = expansion.on_request(params)
+                    except Exception:
+                        replacement = None
+                else:
+                    replacement = None
 
                 if replacement is not None:
                     builder.append(replacement)
