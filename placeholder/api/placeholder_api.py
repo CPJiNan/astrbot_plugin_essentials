@@ -6,9 +6,8 @@ from ..models.placeholder_expansion import PlaceholderExpansion
 
 class PlaceholderAPI:
 
-    def __init__(self, plugin):
-        self.plugin = plugin
-        self.manager = ExpansionManager()
+    def __init__(self, config):
+        self.manager = ExpansionManager(config)
 
     async def initialize(self):
         pass
@@ -77,7 +76,7 @@ class PlaceholderAPI:
         """检查文本中是否包含占位符"""
         if not text:
             return False
-        first = text.find('%')
+        first = text.find(self.manager.PREFIX)
         if first == -1:
             return False
-        return text.find('%', first + 1) != -1
+        return text.find(self.manager.SUFFIX, first + 1) != -1

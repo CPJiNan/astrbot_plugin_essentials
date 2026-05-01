@@ -1,4 +1,9 @@
 {
+  "permission_enabled": {
+    "description": "是否启用权限模块",
+    "type": "bool",
+    "default": true
+  },
   "webeditor_enabled": {
     "description": "是否启用网页编辑器",
     "type": "bool",
@@ -13,6 +18,21 @@
     "description": "网页编辑器端口",
     "type": "int",
     "default": 25560
+  },
+  "placeholder_enabled": {
+    "description": "是否启用占位符模块",
+    "type": "bool",
+    "default": true
+  },
+  "placeholder_prefix": {
+    "description": "占位符前缀",
+    "type": "string",
+    "default": "%"
+  },
+  "placeholder_suffix": {
+    "description": "占位符后缀",
+    "type": "string",
+    "default": "%"
   },
   "cache_default_expiry": {
     "description": "默认缓存过期时间（秒）",

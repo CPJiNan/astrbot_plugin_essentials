@@ -13,19 +13,28 @@ class EssentialsPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.config = config
-        self.permission_api = PermissionAPI(self, self.config)
-        self.context.essentials_permission_api = self.permission_api
-        self.placeholder_api = PlaceholderAPI(self)
-        self.context.essentials_placeholder_api = self.placeholder_api
+        self.permission_api: Optional[PermissionAPI] = None
+        self.placeholder_api: Optional[PlaceholderAPI] = None
         self.web_editor: Optional[WebEditor] = None
 
+        if self.config.get("permission_enabled", True):
+            self.permission_api = PermissionAPI(self, self.config)
+            self.context.essentials_permission_api = self.permission_api
+
+        if self.config.get("placeholder_enabled", True):
+            self.placeholder_api = PlaceholderAPI(self.config)
+            self.context.essentials_placeholder_api = self.placeholder_api
+
     async def initialize(self):
-        await self.permission_api.initialize()
-        await self.placeholder_api.initialize()
+        if self.permission_api:
+            await self.permission_api.initialize()
 
-        await self.placeholder_api.register(PermissionExpansion(self.permission_api))
+        if self.placeholder_api:
+            await self.placeholder_api.initialize()
+            if self.permission_api:
+                await self.placeholder_api.register(PermissionExpansion(self.permission_api))
 
-        if self.config.get("webeditor_enabled", True):
+        if self.config.get("webeditor_enabled", True) and self.permission_api:
             self.web_editor = WebEditor(
                 self.permission_api,
                 host=self.config.get("webeditor_host", "127.0.0.1"),
@@ -35,10 +44,12 @@ class EssentialsPlugin(Star):
         logger.info("插件加载成功。")
 
     async def terminate(self):
+        if self.permission_api:
+            await self.permission_api.terminate()
+        if self.placeholder_api:
+            await self.placeholder_api.terminate()
         if self.web_editor:
             await self.web_editor.stop()
-        await self.permission_api.terminate()
-        await self.placeholder_api.terminate()
         logger.info("插件卸载成功。")
 
     @filter.command_group("permission", alias={'perm', '权限管理'})
@@ -54,6 +65,9 @@ class EssentialsPlugin(Star):
     @user.command("info", alias={'i', '信息'})
     async def user_info(self, event: AstrMessageEvent, user_id: str):
         """获取用户信息"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.info",
                                                                                       event.session_id):
@@ -80,6 +94,9 @@ class EssentialsPlugin(Star):
     @user_permission.command("has", alias={'h', '检查'})
     async def user_permission_has(self, event: AstrMessageEvent, user_id: str, node: str):
         """检查用户权限"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.permission.has",
                                                                                       event.session_id):
@@ -91,6 +108,9 @@ class EssentialsPlugin(Star):
     @user_permission.command("add", alias={'a', '新增'})
     async def user_permission_add(self, event: AstrMessageEvent, user_id: str, node: str):
         """新增用户权限"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.permission.add",
                                                                                       event.session_id):
@@ -102,6 +122,9 @@ class EssentialsPlugin(Star):
     @user_permission.command("remove", alias={'r', '移除'})
     async def user_permission_remove(self, event: AstrMessageEvent, user_id: str, node: str):
         """移除用户权限"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.permission.remove",
                                                                                       event.session_id):
@@ -118,6 +141,9 @@ class EssentialsPlugin(Star):
     @user_group.command("add", alias={'a', '新增'})
     async def user_group_add(self, event: AstrMessageEvent, user_id: str, group_name: str):
         """新增用户权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.group.add",
                                                                                       event.session_id):
@@ -129,6 +155,9 @@ class EssentialsPlugin(Star):
     @user_group.command("remove", alias={'r', '移除'})
     async def user_group_remove(self, event: AstrMessageEvent, user_id: str, group_name: str):
         """移除用户权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.user.group.remove",
                                                                                       event.session_id):
@@ -145,6 +174,9 @@ class EssentialsPlugin(Star):
     @group.command("list", alias={'l', '列表'})
     async def group_list(self, event: AstrMessageEvent):
         """获取权限组列表"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.list",
                                                                                       event.session_id):
@@ -160,6 +192,9 @@ class EssentialsPlugin(Star):
     @group.command("info", alias={'i', '信息'})
     async def group_info(self, event: AstrMessageEvent, group_name: str):
         """获取权限组信息"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.info",
                                                                                       event.session_id):
@@ -181,6 +216,9 @@ class EssentialsPlugin(Star):
     @group.command("create", alias={'c', '创建'})
     async def group_create(self, event: AstrMessageEvent, group_name: str):
         """创建权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.create",
                                                                                       event.session_id):
@@ -192,6 +230,9 @@ class EssentialsPlugin(Star):
     @group.command("delete", alias={'d', '删除'})
     async def group_delete(self, event: AstrMessageEvent, group_name: str):
         """删除权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.delete",
                                                                                       event.session_id):
@@ -208,6 +249,9 @@ class EssentialsPlugin(Star):
     @group_permission.command("add", alias={'a', '新增'})
     async def group_permission_add(self, event: AstrMessageEvent, group_name: str, node: str):
         """新增权限组权限"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.permission.add",
                                                                                       event.session_id):
@@ -219,6 +263,9 @@ class EssentialsPlugin(Star):
     @group_permission.command("remove", alias={'r', '移除'})
     async def group_permission_remove(self, event: AstrMessageEvent, group_name: str, node: str):
         """移除权限组权限"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.permission.remove",
                                                                                       event.session_id):
@@ -235,6 +282,9 @@ class EssentialsPlugin(Star):
     @group_parent.command("add", alias={'a', '新增'})
     async def group_parent_add(self, event: AstrMessageEvent, group_name: str, parent: str):
         """为权限组新增父权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.parent.add",
                                                                                       event.session_id):
@@ -246,6 +296,9 @@ class EssentialsPlugin(Star):
     @group_parent.command("remove", alias={'r', '移除'})
     async def group_parent_remove(self, event: AstrMessageEvent, group_name: str, parent: str):
         """从权限组移除父权限组"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.group.parent.remove",
                                                                                       event.session_id):
@@ -262,6 +315,9 @@ class EssentialsPlugin(Star):
     @editor.command("start", alias={'启动'})
     async def editor_start(self, event: AstrMessageEvent):
         """启动网页编辑器"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.editor.start",
                                                                                       event.session_id):
@@ -283,6 +339,9 @@ class EssentialsPlugin(Star):
     @editor.command("stop", alias={'关闭'})
     async def editor_stop(self, event: AstrMessageEvent):
         """关闭网页编辑器"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.editor.stop",
                                                                                       event.session_id):
@@ -305,6 +364,9 @@ class EssentialsPlugin(Star):
     @editor.command("status", alias={'状态'})
     async def editor_status(self, event: AstrMessageEvent):
         """查看网页编辑器状态"""
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
         if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
                                                                                       "essentials.permission.editor.status",
                                                                                       event.session_id):
@@ -328,10 +390,19 @@ class EssentialsPlugin(Star):
     @placeholder.command("parse", alias={'p', '解析'})
     async def placeholder_parse(self, event: AstrMessageEvent, text: str):
         """解析文本中的占位符"""
-        if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
-                                                                                      "essentials.placeholder.parse",
-                                                                                      event.session_id):
-            yield event.plain_result("无使用当前命令的权限。")
+        if not self.placeholder_api:
+            yield event.plain_result("占位符模块未启用。")
             return
+        if self.permission_api:
+            if not event.is_admin() and not await self.permission_api.has_user_permission(
+                    event.get_sender_id(),
+                    "essentials.placeholder.parse",
+                    event.session_id):
+                yield event.plain_result("无使用当前命令的权限。")
+                return
+        else:
+            if not event.is_admin():
+                yield event.plain_result("无使用当前命令的权限。")
+                return
         result = await self.placeholder_api.set_placeholders(text)
         yield event.plain_result(result)

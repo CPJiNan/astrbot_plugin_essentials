@@ -8,10 +8,9 @@ from ..models.placeholder_expansion import PlaceholderExpansion
 class ExpansionManager:
     """占位符拓展管理器"""
 
-    HEAD = '%'
-    TAIL = '%'
-
-    def __init__(self):
+    def __init__(self, config):
+        self.PREFIX = config.get("placeholder_prefix", "%")
+        self.SUFFIX = config.get("placeholder_suffix", "%")
         self._expansions: Dict[str, PlaceholderExpansion] = {}
 
     async def register(self, expansion: PlaceholderExpansion) -> bool:
@@ -54,7 +53,7 @@ class ExpansionManager:
         return identifier.lower() in self._expansions
 
     async def set_placeholders(self, text: str) -> str:
-        start = text.find(self.HEAD)
+        start = text.find(self.PREFIX)
         if start == -1:
             return text
 
@@ -66,7 +65,7 @@ class ExpansionManager:
             if start > cursor:
                 builder.append(text[cursor:start])
 
-            end = text.find(self.TAIL, start + 1)
+            end = text.find(self.SUFFIX, start + 1)
             if end == -1:
                 builder.append(text[start:length])
                 return ''.join(builder)
@@ -75,9 +74,9 @@ class ExpansionManager:
             for i in range(start + 1, end):
                 ch = text[i]
                 if ch == ' ' and underscore == -1:
-                    builder.append(self.HEAD)
+                    builder.append(self.PREFIX)
                     cursor = start + 1
-                    start = text.find(self.HEAD, cursor)
+                    start = text.find(self.PREFIX, cursor)
                     if start == -1:
                         builder.append(text[cursor:length])
                         return ''.join(builder)
@@ -88,7 +87,7 @@ class ExpansionManager:
                 if underscore == -1:
                     builder.append(text[start:end + 1])
                     cursor = end + 1
-                    start = text.find(self.HEAD, cursor)
+                    start = text.find(self.PREFIX, cursor)
                     if start == -1:
                         break
                     continue
@@ -110,14 +109,14 @@ class ExpansionManager:
                 if replacement is not None:
                     builder.append(replacement)
                 else:
-                    builder.append(self.HEAD)
+                    builder.append(self.PREFIX)
                     builder.append(identifier)
                     builder.append('_')
                     builder.append(params)
-                    builder.append(self.TAIL)
+                    builder.append(self.SUFFIX)
 
                 cursor = end + 1
-                start = text.find(self.HEAD, cursor)
+                start = text.find(self.PREFIX, cursor)
                 if start == -1:
                     break
                 continue
