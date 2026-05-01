@@ -77,10 +77,10 @@ class EconomyManager:
     async def set_balance(self, user_id: str, currency: str, amount: int) -> bool:
         """设置用户余额"""
         try:
+            if not await self.has_account(user_id):
+                await self.create_account(user_id)
             data = self.storage.get_data()
             account = data.accounts.get(user_id)
-            if not account:
-                return False
             account.balances[currency] = amount
             await self.storage.save()
             self.cache.clear_prefix(f"{user_id}:")
@@ -94,7 +94,7 @@ class EconomyManager:
         if amount <= 0:
             return False
         if not await self.has_account(user_id):
-            return False
+            await self.create_account(user_id)
         current = await self.get_balance(user_id, currency)
         return await self.set_balance(user_id, currency, current + amount)
 
@@ -103,7 +103,7 @@ class EconomyManager:
         if amount <= 0:
             return False
         if not await self.has_account(user_id):
-            return False
+            await self.create_account(user_id)
         current = await self.get_balance(user_id, currency)
         if current < amount:
             return False

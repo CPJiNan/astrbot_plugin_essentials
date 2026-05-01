@@ -7,7 +7,7 @@ from astrbot.api.star import Context, Star
 
 from .economy import EconomyAPI
 from .permission import PermissionAPI
-from .placeholder import PlaceholderAPI, PermissionExpansion
+from .placeholder import PlaceholderAPI, PermissionExpansion, EconomyExpansion
 from .webeditor import WebEditor
 
 
@@ -39,6 +39,8 @@ class EssentialsPlugin(Star):
             await self.placeholder_api.initialize()
             if self.permission_api:
                 await self.placeholder_api.register(PermissionExpansion(self.permission_api))
+            if self.economy_api:
+                await self.placeholder_api.register(EconomyExpansion(self.economy_api))
         if self.economy_api:
             await self.economy_api.initialize()
         if self.config.get("webeditor", {}).get("enabled", True) and self.permission_api:
@@ -422,6 +424,86 @@ class EssentialsPlugin(Star):
             f"版本：{expansion.version}\n"
         )
 
+    @filter.command_group("economy", alias={'eco', '经济'})
+    def economy(self):
+        """经济命令组"""
+        pass
+
+    @economy.command("balance", alias={'b', 'bal', '余额'})
+    async def economy_balance(self, event: AstrMessageEvent, user_id: str, currency: str):
+        """获取用户余额"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.balance"):
+            yield result
+            return
+        if not await self.economy_api.has_account(user_id):
+            yield event.plain_result(f"用户 {user_id} 未创建账户。")
+            return
+        balance = await self.economy_api.get_balance(user_id, currency)
+        yield event.plain_result(f"用户 {user_id} 的 {currency} 余额为 {balance}。")
+
+    @economy.command("create", alias={'c', '创建'})
+    async def economy_create(self, event: AstrMessageEvent, user_id: str):
+        """创建用户账户"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.create"):
+            yield result
+            return
+        result = await self.economy_api.create_account(user_id)
+        yield event.plain_result(f"创建用户账户{'成功' if result else '失败'}。")
+
+    @economy.command("delete", alias={'d', '删除'})
+    async def economy_delete(self, event: AstrMessageEvent, user_id: str):
+        """删除用户账户"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.delete"):
+            yield result
+            return
+        result = await self.economy_api.delete_account(user_id)
+        yield event.plain_result(f"删除用户账户{'成功' if result else '失败'}。")
+
+    @economy.command("set", alias={'s', '设置'})
+    async def economy_set(self, event: AstrMessageEvent, user_id: str, currency: str, amount: int):
+        """设置用户余额"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.set"):
+            yield result
+            return
+        result = await self.economy_api.set_balance(user_id, currency, amount)
+        yield event.plain_result(f"设置用户余额{'成功' if result else '失败'}。")
+
+    @economy.command("add", alias={'a', '增加'})
+    async def economy_add(self, event: AstrMessageEvent, user_id: str, currency: str, amount: int):
+        """增加用户余额"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.add"):
+            yield result
+            return
+        result = await self.economy_api.add_balance(user_id, currency, amount)
+        yield event.plain_result(f"增加用户余额{'成功' if result else '失败'}。")
+
+    @economy.command("remove", alias={'r', '减少'})
+    async def economy_remove(self, event: AstrMessageEvent, user_id: str, currency: str, amount: int):
+        """减少用户余额"""
+        async for result in self.require_economy_api(event):
+            yield result
+            return
+        async for result in self.require_permission(event, "essentials.economy.remove"):
+            yield result
+            return
+        result = await self.economy_api.remove_balance(user_id, currency, amount)
+        yield event.plain_result(f"减少用户余额{'成功' if result else '失败'}。")
+
     async def require_permission(self, event: AstrMessageEvent, permission: str):
         if event.is_admin():
             return
@@ -441,6 +523,11 @@ class EssentialsPlugin(Star):
     async def require_placeholder_api(self, event: AstrMessageEvent):
         if not self.placeholder_api:
             yield event.plain_result("占位符模块未启用。")
+            return
+
+    async def require_economy_api(self, event: AstrMessageEvent):
+        if not self.economy_api:
+            yield event.plain_result("经济模块未启用。")
             return
 
     async def require_webeditor(self, event: AstrMessageEvent):
