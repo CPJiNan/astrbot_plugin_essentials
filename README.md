@@ -39,6 +39,14 @@ Essentials 提供了强大的权限管理系统，支持灵活的权限配置和
 | /permission editor stop                            | 关闭网页编辑器    |
 | /permission editor status                          | 查看网页编辑器状态  |
 
+### 占位符列表
+
+| 占位符                                   | 描述      |
+|---------------------------------------|---------|
+| %permission_groups%                   | 获取权限组列表 |
+| %permission_has_permission_<用户>_<权限>% | 检查用户权限  |
+| %permission_in_group_<用户>_<权限组>%      | 检查用户权限组 |
+
 ### 调用示例
 
 ```python
@@ -79,14 +87,6 @@ Essentials 提供了灵活的占位符系统，支持在消息文本中使用变
 | /placeholder list       | 获取占位符扩展列表 |
 | /placeholder info <标识符> | 获取占位符扩展信息 |
 
-### 占位符列表
-
-| 占位符                                   | 描述      |
-|---------------------------------------|---------|
-| %permission_groups%                   | 获取权限组列表 |
-| %permission_has_permission_<用户>_<权限>% | 检查用户权限  |
-| %permission_in_group_<用户>_<权限组>%      | 检查用户权限组 |
-
 ### 调用示例
 
 ```python
@@ -123,6 +123,52 @@ class Plugin(Star):
     async def terminate(self):
         if self.placeholder_api:
             await self.placeholder_api.unregister("example")
+```
+
+## 经济模块（economy）
+
+Essentials 提供了多货币经济系统，支持
+
+### 命令列表
+
+| 命令                               | 描述     |
+|----------------------------------|--------|
+| /economy balance <用户ID> <货币>     | 获取用户余额 |
+| /economy create <用户ID>           | 创建用户账户 |
+| /economy delete <用户ID>           | 删除用户账户 |
+| /economy set <用户ID> <货币> <数量>    | 设置用户余额 |
+| /economy add <用户ID> <货币> <数量>    | 增加用户余额 |
+| /economy remove <用户ID> <货币> <数量> | 减少用户余额 |
+
+### 占位符列表
+
+| 占位符                           | 描述         |
+|-------------------------------|------------|
+| %economy_balance_<用户ID>_<货币>% | 获取用户余额     |
+| %economy_has_account_<用户ID>%  | 检查用户账户是否存在 |
+
+### 调用示例
+
+```python
+from astrbot.api.event import filter, AstrMessageEvent
+from astrbot.api.star import Context, Star
+
+
+class Plugin(Star):
+    def __init__(self, context: Context):
+        super().__init__(context)
+        self.economy_api = getattr(self.context, 'essentials_economy_api', None)
+
+    @filter.command("示例命令")
+    async def example(self, event: AstrMessageEvent):
+        if not self.economy_api:
+            yield event.plain_result("获取经济接口失败，请检查前置插件 Essentials 是否启用。")
+            return
+        user_id = event.get_sender_id()
+        result = await self.economy_api.add_balance(user_id, "示例货币", 10)
+        if result:
+            balance = await self.economy_api.get_balance(user_id, "示例货币")
+            yield event.plain_result(f"已为用户 {user_id} 增加 10 示例货币，当前余额：{balance}。")
 ```
 
 ## 相关链接
