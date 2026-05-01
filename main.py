@@ -55,6 +55,7 @@ class EssentialsPlugin(Star):
 
     @filter.on_decorating_result()
     async def on_decorating_result(self, event: AstrMessageEvent):
+        """回复消息前事件"""
         result = event.get_result()
         if not result:
             return
