@@ -9,8 +9,8 @@ class ExpansionManager:
     """占位符拓展管理器"""
 
     def __init__(self, config):
-        self.PREFIX = config.get("placeholder_prefix", "%")
-        self.SUFFIX = config.get("placeholder_suffix", "%")
+        self.PREFIX = config.get("placeholder", {}).get("prefix", "%")
+        self.SUFFIX = config.get("placeholder", {}).get("suffix", "%")
         self._expansions: Dict[str, PlaceholderExpansion] = {}
 
     async def register(self, expansion: PlaceholderExpansion) -> bool:

@@ -1,42 +1,60 @@
 {
-  "permission_enabled": {
-    "description": "是否启用权限模块",
-    "type": "bool",
-    "default": true
+  "permission": {
+    "description": "权限模块配置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "是否启用权限模块",
+        "type": "bool",
+        "default": true
+      },
+      "cache_default_expiry": {
+        "description": "默认权限缓存过期时间（秒）",
+        "type": "int",
+        "default": 300
+      }
+    }
   },
-  "webeditor_enabled": {
-    "description": "是否启用网页编辑器",
-    "type": "bool",
-    "default": true
+  "webeditor": {
+    "description": "网页编辑器配置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "是否启用网页编辑器",
+        "type": "bool",
+        "default": true
+      },
+      "host": {
+        "description": "网页编辑器地址",
+        "type": "string",
+        "default": "127.0.0.1"
+      },
+      "port": {
+        "description": "网页编辑器端口",
+        "type": "int",
+        "default": 25560
+      }
+    }
   },
-  "webeditor_host": {
-    "description": "网页编辑器地址",
-    "type": "string",
-    "default": "127.0.0.1"
-  },
-  "webeditor_port": {
-    "description": "网页编辑器端口",
-    "type": "int",
-    "default": 25560
-  },
-  "placeholder_enabled": {
-    "description": "是否启用占位符模块",
-    "type": "bool",
-    "default": true
-  },
-  "placeholder_prefix": {
-    "description": "占位符前缀",
-    "type": "string",
-    "default": "%"
-  },
-  "placeholder_suffix": {
-    "description": "占位符后缀",
-    "type": "string",
-    "default": "%"
-  },
-  "cache_default_expiry": {
-    "description": "默认缓存过期时间（秒）",
-    "type": "int",
-    "default": 300
+  "placeholder": {
+    "description": "占位符模块配置",
+    "type": "object",
+    "items": {
+      "enabled": {
+        "description": "是否启用占位符模块",
+        "type": "bool",
+        "default": true
+      },
+      "prefix": {
+        "description": "占位符前缀",
+        "type": "string",
+        "default": "%"
+      },
+      "suffix": {
+        "description": "占位符后缀",
+        "type": "string",
+        "default": "%"
+      }
+    }
   }
 }

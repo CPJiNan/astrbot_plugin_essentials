@@ -16,7 +16,7 @@ class PermissionManager:
     def __init__(self, plugin, config: AstrBotConfig):
         self.plugin = plugin
         self.storage = PermissionStorage(plugin)
-        self.cache = SimpleCache(default_expiry=config.get("cache_default_expiry", 300))
+        self.cache = SimpleCache(default_expiry=config.get("permission", {}).get("cache_default_expiry", 300))
 
     async def initialize(self):
         await self.storage.initialize()

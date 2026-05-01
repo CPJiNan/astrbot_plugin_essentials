@@ -17,11 +17,11 @@ class EssentialsPlugin(Star):
         self.placeholder_api: Optional[PlaceholderAPI] = None
         self.web_editor: Optional[WebEditor] = None
 
-        if self.config.get("permission_enabled", True):
+        if self.config.get("permission", {}).get("enabled", True):
             self.permission_api = PermissionAPI(self, self.config)
             self.context.essentials_permission_api = self.permission_api
 
-        if self.config.get("placeholder_enabled", True):
+        if self.config.get("placeholder", {}).get("enabled", True):
             self.placeholder_api = PlaceholderAPI(self.config)
             self.context.essentials_placeholder_api = self.placeholder_api
 
@@ -34,11 +34,11 @@ class EssentialsPlugin(Star):
             if self.permission_api:
                 await self.placeholder_api.register(PermissionExpansion(self.permission_api))
 
-        if self.config.get("webeditor_enabled", True) and self.permission_api:
+        if self.config.get("webeditor", {}).get("enabled", True) and self.permission_api:
             self.web_editor = WebEditor(
                 self.permission_api,
-                host=self.config.get("webeditor_host", "127.0.0.1"),
-                port=self.config.get("webeditor_port", 25560)
+                host=self.config.get("webeditor", {}).get("host", "127.0.0.1"),
+                port=self.config.get("webeditor", {}).get("port", 25560)
             )
 
         logger.info("插件加载成功。")
