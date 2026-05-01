@@ -199,7 +199,7 @@ class EssentialsPlugin(Star):
         if not groups:
             yield event.plain_result("暂无权限组。")
             return
-        group_list = ", ".join(f"{group.name}({group.display or group.name})" for group in groups)
+        group_list = ", ".join(f"{group.name}({group.display})" if group.display else group.name for group in groups)
         yield event.plain_result(f"权限组列表：\n{group_list}")
 
     @group.command("info", alias={'i', '信息'})
@@ -406,16 +406,58 @@ class EssentialsPlugin(Star):
         if not self.placeholder_api:
             yield event.plain_result("占位符模块未启用。")
             return
-        if self.permission_api:
-            if not event.is_admin() and not await self.permission_api.has_user_permission(
-                    event.get_sender_id(),
-                    "essentials.placeholder.parse",
-                    event.session_id):
-                yield event.plain_result("无使用当前命令的权限。")
-                return
-        else:
-            if not event.is_admin():
-                yield event.plain_result("无使用当前命令的权限。")
-                return
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
+        if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
+                                                                                      "essentials.placeholder.parse",
+                                                                                      event.session_id):
+            yield event.plain_result("无使用当前命令的权限。")
+            return
         result = await self.placeholder_api.set_placeholders(text)
         yield event.plain_result(result)
+
+    @placeholder.command("list", alias={'l', '列表'})
+    async def placeholder_list(self, event: AstrMessageEvent):
+        """获取占位符扩展列表"""
+        if not self.placeholder_api:
+            yield event.plain_result("占位符模块未启用。")
+            return
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
+        if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
+                                                                                      "essentials.placeholder.list",
+                                                                                      event.session_id):
+            yield event.plain_result("无使用当前命令的权限。")
+            return
+        expansions = await self.placeholder_api.get_expansions()
+        if not expansions:
+            yield event.plain_result("暂无占位符扩展。")
+            return
+        expansion_list = ", ".join(f"{expansion.identifier}" for expansion in expansions)
+        yield event.plain_result(f"占位符扩展列表：\n{expansion_list}")
+
+    @placeholder.command("info", alias={'i', '信息'})
+    async def placeholder_info(self, event: AstrMessageEvent, identifier: str):
+        """获取占位符扩展信息"""
+        if not self.placeholder_api:
+            yield event.plain_result("占位符模块未启用。")
+            return
+        if not self.permission_api:
+            yield event.plain_result("权限模块未启用。")
+            return
+        if not event.is_admin() and not await self.permission_api.has_user_permission(event.get_sender_id(),
+                                                                                      "essentials.placeholder.info",
+                                                                                      event.session_id):
+            yield event.plain_result("无使用当前命令的权限。")
+            return
+        expansion = await self.placeholder_api.get_expansion(identifier)
+        if not expansion:
+            yield event.plain_result(f"未找到占位符扩展 {identifier}。")
+            return
+        yield event.plain_result(
+            f"标识符：{expansion.identifier}\n"
+            f"作者：{expansion.author}\n"
+            f"版本：{expansion.version}\n"
+        )
