@@ -97,7 +97,7 @@ class ExpansionManager:
                 if underscore + 1 < end:
                     params = text[underscore + 1:end]
 
-                expansion = self.get_expansion(identifier.lower())
+                expansion = await self.get_expansion(identifier.lower())
                 if expansion:
                     try:
                         replacement = await expansion.on_request(params)
