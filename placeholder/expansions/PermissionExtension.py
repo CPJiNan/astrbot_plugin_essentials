@@ -18,6 +18,9 @@ class PermissionExpansion(PlaceholderExpansion):
     def version(self) -> str:
         return "1.0.0"
 
+    def can_register(self) -> bool:
+        return self._permission_api is not None
+
     async def on_request(self, params: str) -> str:
         match params:
             case "groups":
