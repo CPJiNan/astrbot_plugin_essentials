@@ -15,10 +15,9 @@ const API = {
      * 发送 HTTP 请求。
      */
     async _fetch(url, options) {
-        if (!url.startsWith(this.baseUrl)) {
-            throw new Error(`请求的 URL 不在白名单内：${url}。`);
-        }
-        return fetch(url, options);
+        if (url.startsWith(this.baseUrl)) {
+            return fetch(url, options);
+        } else throw new Error(`请求的 URL 不在白名单内：${url}。`);
     },
 
     /**
