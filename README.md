@@ -67,6 +67,64 @@ class Plugin(Star):
         yield event.plain_result("示例命令执行成功。")
 ```
 
+## 占位符模块（placeholder）
+
+Essentials 提供了灵活的占位符系统，支持在消息文本中使用变量，同时允许注册自定义占位符扩展。
+
+### 命令列表
+
+| 命令                      | 描述        |
+|-------------------------|-----------|
+| /placeholder parse <文本> | 解析文本中的占位符 |
+| /placeholder list       | 获取占位符扩展列表 |
+| /placeholder info <标识符> | 获取占位符扩展信息 |
+
+### 占位符列表
+
+| 占位符                                   | 描述      |
+|---------------------------------------|---------|
+| %permission_groups%                   | 获取权限组列表 |
+| %permission_has_permission_<用户>_<权限>% | 检查用户权限  |
+| %permission_in_group_<用户>_<权限组>%      | 检查用户权限组 |
+
+### 调用示例
+
+```python
+import random
+
+from astrbot.api.event import filter, AstrMessageEvent
+from astrbot.api.star import Context, Star
+
+
+class Plugin(Star):
+    def __init__(self, context: Context):
+        super().__init__(context)
+        self.placeholder_api = getattr(self.context, 'essentials_placeholder_api', None)
+
+    async def initialize(self):
+        if self.placeholder_api:
+            await self.placeholder_api.register(
+                self.placeholder_api.create_expansion(
+                    identifier="example",
+                    author="Author",
+                    version="1.0.0",
+                    handler=self._on_placeholder_request
+                )
+            )
+
+    async def _on_placeholder_request(self, params: str) -> str:
+        # 占位符逻辑。
+        match params:
+            case "random":
+                return str(random.randint(1, 100))
+            case _:
+                return ""
+
+    async def terminate(self):
+        if self.placeholder_api:
+            await self.placeholder_api.unregister("example")
+```
+
 ## 相关链接
 
 - **QQ 群**：[1103154674](https://qm.qq.com/q/N5J07bh5M4)
