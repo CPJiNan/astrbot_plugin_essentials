@@ -2,6 +2,7 @@ from typing import Optional
 
 from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import filter, AstrMessageEvent
+from astrbot.api.message_components import Plain
 from astrbot.api.star import Context, Star
 
 from .permission import PermissionAPI
@@ -51,6 +52,17 @@ class EssentialsPlugin(Star):
         if self.web_editor:
             await self.web_editor.stop()
         logger.info("插件卸载成功。")
+
+    @filter.on_decorating_result()
+    async def on_decorating_result(self, event: AstrMessageEvent):
+        result = event.get_result()
+        if not result:
+            return
+
+        if self.placeholder_api and self.config.get("placeholder", {}).get("parse_message", True):
+            for component in result.chain:
+                if isinstance(component, Plain):
+                    component.text = await self.placeholder_api.set_placeholders(component.text)
 
     @filter.command_group("permission", alias={'perm', '权限管理'})
     def permission(self):

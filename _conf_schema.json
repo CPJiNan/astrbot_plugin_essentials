@@ -54,6 +54,11 @@
         "description": "占位符后缀",
         "type": "string",
         "default": "%"
+      },
+      "parse_message": {
+        "description": "是否解析消息中的占位符",
+        "type": "bool",
+        "default": true
       }
     }
   }
