@@ -49,6 +49,8 @@ class EssentialsPlugin(Star):
             await self.permission_api.terminate()
         if self.placeholder_api:
             await self.placeholder_api.terminate()
+            if self.permission_api:
+                await self.placeholder_api.unregister("permission")
         if self.web_editor:
             await self.web_editor.stop()
         logger.info("插件卸载成功。")
