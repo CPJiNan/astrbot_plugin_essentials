@@ -12,6 +12,16 @@ const API = {
     _token: null,
 
     /**
+     * 发送 HTTP 请求。
+     */
+    async _fetch(url, options) {
+        if (!url.startsWith(this.baseUrl)) {
+            throw new Error(`请求的 URL 不在白名单内：${url}。`);
+        }
+        return fetch(url, options);
+    },
+
+    /**
      * 设置访问令牌。
      */
     setToken(token) {
@@ -49,7 +59,7 @@ const API = {
      * 验证访问令牌。
      */
     async verifyToken(token) {
-        const response = await fetch(`${this.baseUrl}/auth/verify`, {
+        const response = await this._fetch(`${this.baseUrl}/auth/verify`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({token})
@@ -69,7 +79,7 @@ const API = {
      * 获取用户。
      */
     async getUser(userId) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取用户失败：${response.status}。`);
@@ -80,7 +90,7 @@ const API = {
      * 获取用户列表。
      */
     async getUsers() {
-        const response = await fetch(`${this.baseUrl}/users`, {
+        const response = await this._fetch(`${this.baseUrl}/users`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取用户列表失败：${response.status}。`);
@@ -91,7 +101,7 @@ const API = {
      * 创建用户。
      */
     async createUser(userId) {
-        const response = await fetch(`${this.baseUrl}/users`, {
+        const response = await this._fetch(`${this.baseUrl}/users`, {
             method: 'POST',
             headers: this._authHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify({user_id: userId})
@@ -107,7 +117,7 @@ const API = {
      * 删除用户。
      */
     async deleteUser(userId) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}`, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
@@ -121,7 +131,7 @@ const API = {
      * 获取权限组。
      */
     async getGroup(groupName) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取权限组失败：${response.status}。`);
@@ -132,7 +142,7 @@ const API = {
      * 获取权限组列表。
      */
     async getGroups() {
-        const response = await fetch(`${this.baseUrl}/groups`, {
+        const response = await this._fetch(`${this.baseUrl}/groups`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取权限组列表失败：${response.status}。`);
@@ -143,7 +153,7 @@ const API = {
      * 创建权限组。
      */
     async createGroup(group) {
-        const response = await fetch(`${this.baseUrl}/groups`, {
+        const response = await this._fetch(`${this.baseUrl}/groups`, {
             method: 'POST',
             headers: this._authHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify(group)
@@ -159,7 +169,7 @@ const API = {
      * 删除权限组。
      */
     async deleteGroup(groupName) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
@@ -173,7 +183,7 @@ const API = {
      * 更新权限组。
      */
     async updateGroup(groupName, group) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}`, {
             method: 'PUT',
             headers: this._authHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify(group)
@@ -189,7 +199,7 @@ const API = {
      * 获取用户权限列表。
      */
     async getUserPermissions(userId) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/permissions`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/permissions`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取用户权限列表失败：${response.status}。`);
@@ -200,7 +210,7 @@ const API = {
      * 新增用户权限。
      */
     async addUserPermission(userId, permission) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/permissions`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/permissions`, {
             method: 'POST',
             headers: this._authHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify(permission)
@@ -220,7 +230,7 @@ const API = {
         if (session) {
             url += `?session=${encodeURIComponent(session)}`;
         }
-        const response = await fetch(url, {
+        const response = await this._fetch(url, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
@@ -249,7 +259,7 @@ const API = {
      * 获取权限组权限列表。
      */
     async getGroupPermissions(groupName) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/permissions`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/permissions`, {
             headers: this._authHeaders()
         });
         if (!response.ok) throw new Error(`获取权限组权限列表失败：${response.status}。`);
@@ -260,7 +270,7 @@ const API = {
      * 新增权限组权限。
      */
     async addGroupPermission(groupName, permission) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/permissions`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/permissions`, {
             method: 'POST',
             headers: this._authHeaders({'Content-Type': 'application/json'}),
             body: JSON.stringify(permission)
@@ -280,7 +290,7 @@ const API = {
         if (session) {
             url += `?session=${encodeURIComponent(session)}`;
         }
-        const response = await fetch(url, {
+        const response = await this._fetch(url, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
@@ -309,7 +319,7 @@ const API = {
      * 新增用户权限组。
      */
     async addUserToGroup(userId, groupName) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupName)}`, {
             method: 'POST',
             headers: this._authHeaders()
         });
@@ -323,7 +333,7 @@ const API = {
      * 移除用户权限组。
      */
     async removeUserFromGroup(userId, groupName) {
-        const response = await fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupName)}`, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
@@ -337,7 +347,7 @@ const API = {
      * 为权限组新增父权限组。
      */
     async addGroupParent(groupName, parentName) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/parents/${encodeURIComponent(parentName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/parents/${encodeURIComponent(parentName)}`, {
             method: 'POST',
             headers: this._authHeaders()
         });
@@ -351,7 +361,7 @@ const API = {
      * 从权限组移除父权限组。
      */
     async removeGroupParent(groupName, parentName) {
-        const response = await fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/parents/${encodeURIComponent(parentName)}`, {
+        const response = await this._fetch(`${this.baseUrl}/groups/${encodeURIComponent(groupName)}/parents/${encodeURIComponent(parentName)}`, {
             method: 'DELETE',
             headers: this._authHeaders()
         });
