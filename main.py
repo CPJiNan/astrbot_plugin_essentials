@@ -23,7 +23,7 @@ class EssentialsPlugin(Star):
         await self.permission_api.initialize()
         await self.placeholder_api.initialize()
 
-        self.placeholder_api.register(PermissionExpansion(self.permission_api))
+        await self.placeholder_api.register(PermissionExpansion(self.permission_api))
 
         if self.config.get("webeditor_enabled", True):
             self.web_editor = WebEditor(

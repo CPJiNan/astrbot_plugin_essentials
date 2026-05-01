@@ -14,7 +14,7 @@ class ExpansionManager:
     def __init__(self):
         self._expansions: Dict[str, PlaceholderExpansion] = {}
 
-    def register(self, expansion: PlaceholderExpansion) -> bool:
+    async def register(self, expansion: PlaceholderExpansion) -> bool:
         """注册占位符扩展"""
         identifier = expansion.identifier.lower()
         if not identifier or '_' in identifier:
@@ -29,7 +29,7 @@ class ExpansionManager:
         self._expansions[identifier] = expansion
         return True
 
-    def unregister(self, identifier: str) -> bool:
+    async def unregister(self, identifier: str) -> bool:
         """注销占位符扩展"""
         identifier = identifier.lower()
         if identifier not in self._expansions:
@@ -37,19 +37,19 @@ class ExpansionManager:
         del self._expansions[identifier]
         return True
 
-    def get_identifiers(self) -> Set[str]:
+    async def get_identifiers(self) -> Set[str]:
         """获取标识符列表"""
         return set(self._expansions.keys())
 
-    def get_expansion(self, identifier: str) -> Optional[PlaceholderExpansion]:
+    async def get_expansion(self, identifier: str) -> Optional[PlaceholderExpansion]:
         """获取占位符扩展"""
         return self._expansions.get(identifier.lower())
 
-    def get_expansions(self) -> List[PlaceholderExpansion]:
+    async def get_expansions(self) -> List[PlaceholderExpansion]:
         """获取占位符扩展列表"""
         return list(self._expansions.values())
 
-    def is_registered(self, identifier: str) -> bool:
+    async def is_registered(self, identifier: str) -> bool:
         """检查占位符是否已注册"""
         return identifier.lower() in self._expansions
 
