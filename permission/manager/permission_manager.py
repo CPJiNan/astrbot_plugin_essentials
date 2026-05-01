@@ -135,7 +135,7 @@ class PermissionManager:
             node: str,
             session: Optional[str] = None
     ) -> bool:
-        """检查用户权限"""
+        """检查用户权限是否存在"""
         data = self.storage.get_data()
 
         cache_key = f"{user_id}:{node}:{session or 'global'}"

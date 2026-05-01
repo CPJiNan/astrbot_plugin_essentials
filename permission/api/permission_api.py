@@ -61,7 +61,7 @@ class PermissionAPI:
         return await self.manager.get_user_permissions(user_id)
 
     async def has_user_permission(self, user_id: str, node: str, session: Optional[str] = None) -> bool:
-        """检查用户权限"""
+        """检查用户权限是否存在"""
         return await self.manager.has_user_permission(user_id, node, session)
 
     async def add_user_permission(self, user_id: str, node: str, value: bool = True, priority: int = 0,

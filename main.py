@@ -5,6 +5,7 @@ from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.message_components import Plain
 from astrbot.api.star import Context, Star
 
+from .economy import EconomyAPI
 from .permission import PermissionAPI
 from .placeholder import PlaceholderAPI, PermissionExpansion
 from .webeditor import WebEditor
@@ -16,6 +17,7 @@ class EssentialsPlugin(Star):
         self.config = config
         self.permission_api: Optional[PermissionAPI] = None
         self.placeholder_api: Optional[PlaceholderAPI] = None
+        self.economy_api: Optional[EconomyAPI] = None
         self.web_editor: Optional[WebEditor] = None
 
         if self.config.get("permission", {}).get("enabled", True):
@@ -26,22 +28,25 @@ class EssentialsPlugin(Star):
             self.placeholder_api = PlaceholderAPI(self.config)
             self.context.essentials_placeholder_api = self.placeholder_api
 
+        if self.config.get("economy", {}).get("enabled", True):
+            self.economy_api = EconomyAPI(self, self.config)
+            self.context.essentials_economy_api = self.economy_api
+
     async def initialize(self):
         if self.permission_api:
             await self.permission_api.initialize()
-
         if self.placeholder_api:
             await self.placeholder_api.initialize()
             if self.permission_api:
                 await self.placeholder_api.register(PermissionExpansion(self.permission_api))
-
+        if self.economy_api:
+            await self.economy_api.initialize()
         if self.config.get("webeditor", {}).get("enabled", True) and self.permission_api:
             self.web_editor = WebEditor(
                 self.permission_api,
                 host=self.config.get("webeditor", {}).get("host", "127.0.0.1"),
                 port=self.config.get("webeditor", {}).get("port", 25560)
             )
-
         logger.info("插件加载成功。")
 
     async def terminate(self):
@@ -51,6 +56,8 @@ class EssentialsPlugin(Star):
             await self.placeholder_api.terminate()
             if self.permission_api:
                 await self.placeholder_api.unregister("permission")
+        if self.economy_api:
+            await self.economy_api.terminate()
         if self.web_editor:
             await self.web_editor.stop()
         logger.info("插件卸载成功。")
@@ -106,7 +113,7 @@ class EssentialsPlugin(Star):
 
     @user_permission.command("has", alias={'h', '检查'})
     async def user_permission_has(self, event: AstrMessageEvent, user_id: str, node: str):
-        """检查用户权限"""
+        """检查用户权限是否存在"""
         async for result in self.require_permission_api(event):
             yield result
             return
