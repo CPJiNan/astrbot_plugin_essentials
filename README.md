@@ -127,7 +127,7 @@ class Plugin(Star):
 
 ## 经济模块（economy）
 
-Essentials 提供了多货币经济系统，支持
+Essentials 提供了便捷的经济系统，支持多种货币的创建和管理。
 
 ### 命令列表
 
