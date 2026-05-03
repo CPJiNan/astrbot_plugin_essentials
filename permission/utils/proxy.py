@@ -47,12 +47,12 @@ class PermissionProxy:
             return
         self._process = WakingCheckStage.process
 
-        async def injected_process(self_stage, event: AstrMessageEvent):
+        async def injected_process(stage, event: AstrMessageEvent):
             if not await self.check(event):
                 await event.send(MessageChain().message("无使用当前命令的权限。"))
                 event.stop_event()
                 return None
-            return await self._process(self_stage, event)
+            return await self._process(stage, event)
 
         WakingCheckStage.process = injected_process
         self._injected = True
