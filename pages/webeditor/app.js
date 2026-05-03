@@ -19,6 +19,7 @@ const App = {
     searchQuery: '',
 
     elements: {},
+    _confirmResolve: null,
 
     /**
      * 初始化。
@@ -60,6 +61,7 @@ const App = {
         this.elements.permissionModal = document.getElementById('permissionModal');
         this.elements.addUserModal = document.getElementById('addUserModal');
         this.elements.addGroupModal = document.getElementById('addGroupModal');
+        this.elements.confirmModal = document.getElementById('confirmModal');
     },
 
     /**
@@ -109,11 +111,21 @@ const App = {
             this.updateDeleteGroupPermissionsButton();
         });
 
-        [this.elements.permissionModal, this.elements.addUserModal, this.elements.addGroupModal].forEach(modal => {
+        [this.elements.permissionModal, this.elements.addUserModal, this.elements.addGroupModal, this.elements.confirmModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.classList.remove('active');
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    if (modal === this.elements.confirmModal && this._confirmResolve) {
+                        this._confirmResolve(false);
+                        this._confirmResolve = null;
+                    }
+                }
             });
         });
+
+        document.getElementById('closeConfirmModal').addEventListener('click', () => this._resolveConfirm(false));
+        document.getElementById('cancelConfirmButton').addEventListener('click', () => this._resolveConfirm(false));
+        document.getElementById('confirmConfirmButton').addEventListener('click', () => this._resolveConfirm(true));
     },
 
     /**
@@ -383,7 +395,7 @@ const App = {
     async deleteUser() {
         if (!this.currentUser) return;
 
-        if (!confirm(`确定要删除用户 ${this.currentUser.user_id} 吗？`)) return;
+        if (!await this.confirm(`确定要删除用户 ${this.currentUser.user_id} 吗？`)) return;
 
         try {
             await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/delete');
@@ -602,7 +614,7 @@ const App = {
     async deleteGroup() {
         if (!this.currentGroup) return;
 
-        if (!confirm(`确定要删除权限组 ${this.currentGroup.name} 吗？`)) return;
+        if (!await this.confirm(`确定要删除权限组 ${this.currentGroup.name} 吗？`)) return;
 
         try {
             await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/delete');
@@ -671,6 +683,22 @@ const App = {
             await this.selectGroup(groupName);
         } catch (e) {
             Components.showToast(e.message, 'error');
+        }
+    },
+
+    confirm(message) {
+        return new Promise(resolve => {
+            document.getElementById('confirmModalMessage').textContent = message;
+            this._confirmResolve = resolve;
+            this.elements.confirmModal.classList.add('active');
+        });
+    },
+
+    _resolveConfirm(result) {
+        this.elements.confirmModal.classList.remove('active');
+        if (this._confirmResolve) {
+            this._confirmResolve(result);
+            this._confirmResolve = null;
         }
     }
 };
