@@ -4,13 +4,16 @@ from typing import Any, Dict, List
 
 from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import AstrMessageEvent
+from astrbot.core.pipeline.waking_check.stage import WakingCheckStage
 
 
 class PermissionProxy:
     def __init__(self, permission_api, config: AstrBotConfig):
         self.permission_api = permission_api
-        self.enabled: bool = config.get("permission", {}).get("proxy", {}).get("enabled", True)
+        self.enabled: bool = config.get("permission", {}).get("proxy", {}).get("enabled", False)
         self.rules: List[PermissionProxyRule] = []
+        self._process = None
+        self._injected = False
         self._load_rules(config)
 
     def _load_rules(self, config: AstrBotConfig):
@@ -37,6 +40,28 @@ class PermissionProxy:
                 return True
             return False
         return True
+
+    def inject(self):
+        if self._injected:
+            return
+        self._process = WakingCheckStage.process
+
+        async def injected_process(self_stage, event: AstrMessageEvent):
+            if not await self.check(event):
+                await event.send("无使用当前命令的权限。")
+                event.stop_event()
+                return None
+            return await self._process(self_stage, event)
+
+        WakingCheckStage.process = injected_process
+        self._injected = True
+        logger.info("已向 WakingCheckStage 注入权限代理。")
+
+    def eject(self):
+        if self._injected and self._process:
+            WakingCheckStage.process = self._process
+            self._injected = False
+            logger.info("已从 WakingCheckStage 移除权限代理。")
 
 
 @dataclass

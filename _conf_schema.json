@@ -15,7 +15,7 @@
           "enabled": {
             "description": "是否启用权限代理",
             "type": "bool",
-            "default": true
+            "default": false
           },
           "rules": {
             "description": "规则列表",
