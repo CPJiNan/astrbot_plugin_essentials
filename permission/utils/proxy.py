@@ -24,6 +24,8 @@ class PermissionProxy:
         logger.info(f"已加载 {len(self.rules)} 条权限代理规则。")
 
     async def check(self, event: AstrMessageEvent) -> bool:
+        if event.is_admin():
+            return True
         if not self.enabled:
             return True
         message = event.message_str
@@ -34,8 +36,6 @@ class PermissionProxy:
                 continue
             if not rule.match(message):
                 continue
-            if event.is_admin():
-                return True
             if self.permission_api and await self.permission_api.has_user_permission(event.get_sender_id(), rule.node,
                                                                                      event.session_id):
                 return True
