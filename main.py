@@ -1,3 +1,4 @@
+import sys
 from typing import Optional
 
 from astrbot.api import logger, AstrBotConfig
@@ -7,6 +8,7 @@ from astrbot.api.star import Context, Star
 
 from .economy import EconomyAPI
 from .permission import PermissionAPI
+from .permission.utils.proxy import PermissionProxy
 from .placeholder import PlaceholderAPI, PermissionExpansion, EconomyExpansion
 from .webeditor import WebEditor
 
@@ -16,6 +18,7 @@ class EssentialsPlugin(Star):
         super().__init__(context)
         self.config = config
         self.permission_api: Optional[PermissionAPI] = None
+        self.permission_proxy: Optional[PermissionProxy] = None
         self.placeholder_api: Optional[PlaceholderAPI] = None
         self.economy_api: Optional[EconomyAPI] = None
         self.web_editor: Optional[WebEditor] = None
@@ -35,6 +38,7 @@ class EssentialsPlugin(Star):
     async def initialize(self):
         if self.permission_api:
             await self.permission_api.initialize()
+            self.permission_proxy = PermissionProxy(self.permission_api, self.config)
         if self.placeholder_api:
             await self.placeholder_api.initialize()
             if self.permission_api:
@@ -63,6 +67,13 @@ class EssentialsPlugin(Star):
         if self.web_editor:
             await self.web_editor.stop()
         logger.info("插件卸载成功。")
+
+    @filter.event_message_type(filter.EventMessageType.ALL, priority=sys.maxsize)
+    async def on_all_message(self, event: AstrMessageEvent):
+        """接收消息事件"""
+        if self.permission_proxy and not await self.permission_proxy.check(event):
+            yield event.plain_result("无使用当前命令的权限。")
+            event.stop_event()
 
     @filter.on_decorating_result()
     async def on_decorating_result(self, event: AstrMessageEvent):

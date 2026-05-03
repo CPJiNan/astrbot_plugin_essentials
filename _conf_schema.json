@@ -8,6 +8,48 @@
         "type": "bool",
         "default": true
       },
+      "proxy": {
+        "description": "权限代理",
+        "type": "object",
+        "items": {
+          "enabled": {
+            "description": "是否启用权限代理",
+            "type": "bool",
+            "default": true
+          },
+          "rules": {
+            "description": "规则列表",
+            "type": "template_list",
+            "templates": {
+              "keywords": {
+                "name": "关键词匹配",
+                "items": {
+                  "name": {
+                    "description": "规则名称",
+                    "type": "string",
+                    "default": ""
+                  },
+                  "enabled": {
+                    "description": "是否启用规则",
+                    "type": "bool",
+                    "default": true
+                  },
+                  "keywords": {
+                    "description": "关键词列表",
+                    "type": "list",
+                    "default": []
+                  },
+                  "node": {
+                    "description": "所需权限节点",
+                    "type": "string",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "cache_default_expiry": {
         "description": "默认权限缓存过期时间（秒）",
         "type": "int",
