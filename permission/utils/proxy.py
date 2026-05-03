@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 
 from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import AstrMessageEvent
+from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.pipeline.waking_check.stage import WakingCheckStage
 
 
@@ -48,7 +49,7 @@ class PermissionProxy:
 
         async def injected_process(self_stage, event: AstrMessageEvent):
             if not await self.check(event):
-                await event.send("无使用当前命令的权限。")
+                await event.send(MessageChain().message("无使用当前命令的权限。"))
                 event.stop_event()
                 return None
             return await self._process(self_stage, event)
