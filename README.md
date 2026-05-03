@@ -39,9 +39,6 @@ Essentials 提供了强大的权限管理系统，支持灵活的权限配置和
 | /permission group permission remove <权限组编辑名> <权限>  | 移除权限组权限    |
 | /permission group parent add <权限组编辑名> <父权限组编辑名>    | 为权限组新增父权限组 |
 | /permission group parent remove <权限组编辑名> <父权限组编辑名> | 从权限组移除父权限组 |
-| /permission editor start                           | 启动网页编辑器    |
-| /permission editor stop                            | 关闭网页编辑器    |
-| /permission editor status                          | 查看网页编辑器状态  |
 
 ### 占位符列表
 

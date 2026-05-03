@@ -57,27 +57,6 @@
       }
     }
   },
-  "webeditor": {
-    "description": "网页编辑器配置",
-    "type": "object",
-    "items": {
-      "enabled": {
-        "description": "是否启用网页编辑器",
-        "type": "bool",
-        "default": true
-      },
-      "host": {
-        "description": "网页编辑器地址",
-        "type": "string",
-        "default": "127.0.0.1"
-      },
-      "port": {
-        "description": "网页编辑器端口",
-        "type": "int",
-        "default": 25560
-      }
-    }
-  },
   "placeholder": {
     "description": "占位符模块配置",
     "type": "object",

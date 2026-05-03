@@ -8,8 +8,8 @@ from astrbot.api.star import Context, Star
 from .economy import EconomyAPI
 from .permission import PermissionAPI
 from .permission.utils.proxy import PermissionProxy
+from .permission.webeditor import register_api
 from .placeholder import PlaceholderAPI, PermissionExpansion, EconomyExpansion
-from .webeditor import WebEditor
 
 
 class EssentialsPlugin(Star):
@@ -21,7 +21,6 @@ class EssentialsPlugin(Star):
         self.permission_proxy: Optional[PermissionProxy] = None
         self.placeholder_api: Optional[PlaceholderAPI] = None
         self.economy_api: Optional[EconomyAPI] = None
-        self.web_editor: Optional[WebEditor] = None
 
         if self.config.get("permission", {}).get("enabled", True):
             self.permission_api = PermissionAPI(self, self.config)
@@ -40,6 +39,7 @@ class EssentialsPlugin(Star):
             await self.permission_api.initialize()
             self.permission_proxy = PermissionProxy(self.permission_api, self.context, self.config)
             self.permission_proxy.inject()
+            register_api(self.context, self.permission_api)
         if self.placeholder_api:
             await self.placeholder_api.initialize()
             if self.permission_api:
@@ -48,12 +48,6 @@ class EssentialsPlugin(Star):
                 await self.placeholder_api.register(EconomyExpansion(self.economy_api))
         if self.economy_api:
             await self.economy_api.initialize()
-        if self.config.get("webeditor", {}).get("enabled", True) and self.permission_api:
-            self.web_editor = WebEditor(
-                self.permission_api,
-                host=self.config.get("webeditor", {}).get("host", "127.0.0.1"),
-                port=self.config.get("webeditor", {}).get("port", 25560)
-            )
         logger.info("插件加载成功。")
 
     async def terminate(self):
@@ -67,8 +61,6 @@ class EssentialsPlugin(Star):
                 await self.placeholder_api.unregister("permission")
         if self.economy_api:
             await self.economy_api.terminate()
-        if self.web_editor:
-            await self.web_editor.stop()
         logger.info("插件卸载成功。")
 
     @filter.on_decorating_result()
@@ -310,75 +302,6 @@ class EssentialsPlugin(Star):
         result = await self.permission_api.remove_group_parent(group_name, parent)
         yield event.plain_result(f"从权限组移除父权限组{'成功' if result else '失败'}。")
 
-    @permission.group("editor", alias={'e', '编辑器'})
-    def editor(self):
-        """网页编辑器命令组"""
-        pass
-
-    @editor.command("start", alias={'启动'})
-    async def editor_start(self, event: AstrMessageEvent):
-        """启动网页编辑器"""
-        async for result in self.require_permission_api(event):
-            yield result
-            return
-        async for result in self.require_webeditor(event):
-            yield result
-            return
-        async for result in self.require_permission(event, "essentials.permission.editor.start"):
-            yield result
-            return
-        try:
-            url, token = await self.web_editor.start()
-            yield event.plain_result(
-                f"网页编辑器已在 {url} 上启动。\n"
-                f"访问令牌：{token}"
-            )
-        except Exception as e:
-            logger.error(f"启动网页编辑器失败：{e}。")
-            yield event.plain_result(f"启动网页编辑器失败：{e}。")
-
-    @editor.command("stop", alias={'关闭'})
-    async def editor_stop(self, event: AstrMessageEvent):
-        """关闭网页编辑器"""
-        async for result in self.require_permission_api(event):
-            yield result
-            return
-        async for result in self.require_webeditor(event):
-            yield result
-            return
-        async for result in self.require_permission(event, "essentials.permission.editor.stop"):
-            yield result
-            return
-        is_running = await self.web_editor.is_running()
-        if not is_running:
-            yield event.plain_result("网页编辑器未运行。")
-            return
-        try:
-            await self.web_editor.stop()
-            yield event.plain_result("网页编辑器已关闭。")
-        except Exception as e:
-            logger.error(f"关闭网页编辑器失败：{e}。")
-            yield event.plain_result(f"关闭网页编辑器失败：{e}。")
-
-    @editor.command("status", alias={'状态'})
-    async def editor_status(self, event: AstrMessageEvent):
-        """查看网页编辑器状态"""
-        async for result in self.require_permission_api(event):
-            yield result
-            return
-        async for result in self.require_webeditor(event):
-            yield result
-            return
-        async for result in self.require_permission(event, "essentials.permission.editor.status"):
-            yield result
-            return
-        is_running = await self.web_editor.is_running()
-        if is_running:
-            host, port = await self.web_editor.get_address()
-            yield event.plain_result(f"网页编辑器已在 http://{host}:{port} 上运行。")
-        else:
-            yield event.plain_result("网页编辑器已关闭。使用 /permission editor start 开启。")
-
     @filter.command_group("placeholder", alias={'占位符'})
     def placeholder(self):
         """占位符命令组"""
@@ -535,9 +458,4 @@ class EssentialsPlugin(Star):
     async def require_economy_api(self, event: AstrMessageEvent):
         if not self.economy_api:
             yield event.plain_result("经济模块未启用。")
-            return
-
-    async def require_webeditor(self, event: AstrMessageEvent):
-        if not self.web_editor:
-            yield event.plain_result("网页编辑器未启用。")
             return

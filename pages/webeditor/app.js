@@ -7,7 +7,8 @@
  * @author 季楠
  * @since 2026/4/23 20:25
  */
-/*global API, Components*/
+const bridge = window.AstrBotPluginPage;
+
 const App = {
     currentTab: 'users',
     currentUser: null,
@@ -21,76 +22,11 @@ const App = {
     /**
      * 初始化。
      */
-    init() {
+    async init() {
+        await bridge.ready();
         this.cacheElements();
         this.bindEvents();
-        this.tryAutoLogin();
-    },
-
-    /**
-     * 自动登录。
-     */
-    async tryAutoLogin() {
-        const token = API.getToken();
-        if (token) {
-            try {
-                const valid = await API.verifyToken(token);
-                if (valid) {
-                    this.hideLoginModal();
-                    await this.loadData();
-                    return;
-                }
-            } catch {
-            }
-            API.setToken(null);
-        }
-        this.showLoginModal();
-    },
-
-    /**
-     * 显示登录界面。
-     */
-    showLoginModal() {
-        document.getElementById('loginModal').classList.add('active');
-        document.getElementById('tokenInput').value = '';
-        document.getElementById('loginError').style.display = 'none';
-        document.getElementById('app').style.display = 'none';
-    },
-
-    /**
-     * 隐藏登录界面。
-     */
-    hideLoginModal() {
-        document.getElementById('loginModal').classList.remove('active');
-        document.getElementById('app').style.display = 'flex';
-    },
-
-    /**
-     * 验证访问令牌。
-     */
-    async verifyToken() {
-        const token = document.getElementById('tokenInput').value.trim();
-        const loginError = document.getElementById('loginError');
-
-        if (!token) {
-            loginError.textContent = '请输入访问令牌。';
-            loginError.style.display = 'block';
-            return;
-        }
-
-        try {
-            const valid = await API.verifyToken(token);
-            if (valid) {
-                this.hideLoginModal();
-                await this.loadData();
-            } else {
-                loginError.textContent = '访问令牌无效。';
-                loginError.style.display = 'block';
-            }
-        } catch (e) {
-            loginError.textContent = e.message || '验证访问令牌失败。';
-            loginError.style.display = 'block';
-        }
+        await this.loadData();
     },
 
     /**
@@ -128,11 +64,6 @@ const App = {
      * 绑定事件。
      */
     bindEvents() {
-        document.getElementById('verifyTokenButton').addEventListener('click', () => this.verifyToken());
-        document.getElementById('tokenInput').addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') this.verifyToken();
-        });
-
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => this.switchTab(button.dataset.tab));
         });
@@ -200,7 +131,7 @@ const App = {
      */
     async loadUsers() {
         try {
-            this.users = await API.getUsers();
+            this.users = await bridge.apiGet('users');
         } catch (e) {
             this.users = [];
             console.error('加载用户列表失败：', e);
@@ -212,7 +143,7 @@ const App = {
      */
     async loadGroups() {
         try {
-            this.groups = await API.getGroups();
+            this.groups = await bridge.apiGet('groups');
         } catch (e) {
             this.groups = [];
             console.error('加载权限组列表失败：', e);
@@ -299,7 +230,7 @@ const App = {
      */
     async selectUser(userId) {
         try {
-            this.currentUser = await API.getUser(userId);
+            this.currentUser = await bridge.apiGet('users/' + encodeURIComponent(userId));
             this.currentGroup = null;
 
             this.elements.groupView.classList.add('hidden');
@@ -361,7 +292,7 @@ const App = {
      */
     async selectGroup(groupName) {
         try {
-            this.currentGroup = await API.getGroup(groupName);
+            this.currentGroup = await bridge.apiGet('groups/' + encodeURIComponent(groupName));
             this.currentUser = null;
 
             this.elements.userView.classList.add('hidden');
@@ -437,7 +368,7 @@ const App = {
         }
 
         try {
-            await API.createUser(userId);
+            await bridge.apiPost('users', {user_id: userId});
             Components.showToast('用户创建成功');
             this.hideAddUserModal();
             await this.loadUsers();
@@ -454,7 +385,7 @@ const App = {
         if (!confirm(`确定要删除用户 ${this.currentUser.user_id} 吗？`)) return;
 
         try {
-            await API.deleteUser(this.currentUser.user_id);
+            await bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/delete');
             Components.showToast('用户删除成功');
             this.currentUser = null;
             this.elements.userView.classList.add('hidden');
@@ -475,7 +406,7 @@ const App = {
         }
 
         try {
-            await API.addUserToGroup(this.currentUser.user_id, groupName);
+            await bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/groups/' + encodeURIComponent(groupName));
             Components.showToast('新增用户权限组成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
@@ -486,7 +417,7 @@ const App = {
 
     async removeUserFromGroup(userId, groupName) {
         try {
-            await API.removeUserFromGroup(userId, groupName);
+            await bridge.apiPost('users/' + encodeURIComponent(userId) + '/groups/' + encodeURIComponent(groupName) + '/delete');
             Components.showToast('移除用户权限组成功');
             await this.selectUser(userId);
             await this.loadUsers();
@@ -528,11 +459,25 @@ const App = {
 
         try {
             if (this.permissionModalType === 'user') {
-                await API.addUserPermission(this.currentUser.user_id, {node, value, priority, source, expiry, session});
+                await bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions', {
+                    node,
+                    value,
+                    priority,
+                    source,
+                    expiry,
+                    session
+                });
                 Components.showToast('新增用户权限成功');
                 await this.selectUser(this.currentUser.user_id);
             } else {
-                await API.addGroupPermission(this.currentGroup.name, {node, value, priority, source, expiry, session});
+                await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions', {
+                    node,
+                    value,
+                    priority,
+                    source,
+                    expiry,
+                    session
+                });
                 Components.showToast('新增权限组权限成功');
                 await this.selectGroup(this.currentGroup.name);
             }
@@ -544,7 +489,7 @@ const App = {
 
     async deleteUserPermission(node, session) {
         try {
-            await API.deleteUserPermission(this.currentUser.user_id, node, session);
+            await bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions/' + encodeURIComponent(node) + '/delete', {session: session || null});
             Components.showToast('移除用户权限成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
@@ -555,7 +500,7 @@ const App = {
 
     async deleteGroupPermission(node, session) {
         try {
-            await API.deleteGroupPermission(this.currentGroup.name, node, session);
+            await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions/' + encodeURIComponent(node) + '/delete', {session: session || null});
             Components.showToast('移除权限组权限成功');
             await this.selectGroup(this.currentGroup.name);
             await this.loadGroups();
@@ -590,7 +535,9 @@ const App = {
         if (permissions.length === 0) return;
 
         try {
-            await API.deleteUserPermissions(this.currentUser.user_id, permissions);
+            for (const {node, session} of permissions) {
+                await bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions/' + encodeURIComponent(node) + '/delete', {session});
+            }
             Components.showToast(`已移除用户 ${permissions.length} 个权限`);
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
@@ -609,7 +556,9 @@ const App = {
         if (permissions.length === 0) return;
 
         try {
-            await API.deleteGroupPermissions(this.currentGroup.name, permissions);
+            for (const {node, session} of permissions) {
+                await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions/' + encodeURIComponent(node) + '/delete', {session});
+            }
             Components.showToast(`已移除权限组 ${permissions.length} 个权限`);
             await this.selectGroup(this.currentGroup.name);
             await this.loadGroups();
@@ -638,7 +587,7 @@ const App = {
         }
 
         try {
-            await API.createGroup({name, display, weight: 0, parents: [], permissions: []});
+            await bridge.apiPost('groups', {name, display, weight: 0, parents: [], permissions: []});
             Components.showToast('权限组创建成功');
             this.hideAddGroupModal();
             await this.loadGroups();
@@ -655,7 +604,7 @@ const App = {
         if (!confirm(`确定要删除权限组 ${this.currentGroup.name} 吗？`)) return;
 
         try {
-            await API.deleteGroup(this.currentGroup.name);
+            await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/delete');
             Components.showToast('权限组删除成功');
             this.currentGroup = null;
             this.elements.groupView.classList.add('hidden');
@@ -679,7 +628,7 @@ const App = {
         }
 
         try {
-            await API.updateGroup(this.currentGroup.name, {
+            await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/update', {
                 name,
                 display,
                 weight,
@@ -706,7 +655,7 @@ const App = {
         }
 
         try {
-            await API.addGroupParent(this.currentGroup.name, parentName);
+            await bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/parents/' + encodeURIComponent(parentName));
             Components.showToast('新增父权限组成功');
             await this.selectGroup(this.currentGroup.name);
         } catch (e) {
@@ -716,7 +665,7 @@ const App = {
 
     async removeGroupParent(groupName, parentName) {
         try {
-            await API.removeGroupParent(groupName, parentName);
+            await bridge.apiPost('groups/' + encodeURIComponent(groupName) + '/parents/' + encodeURIComponent(parentName) + '/delete');
             Components.showToast('移除父权限组成功');
             await this.selectGroup(groupName);
         } catch (e) {

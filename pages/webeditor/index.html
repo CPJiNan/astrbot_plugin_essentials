@@ -4,28 +4,9 @@
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Essentials 权限编辑器</title>
-    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
 </head>
 <body>
-<!-- 登录界面 -->
-<div class="modal" id="loginModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>身份验证</h3>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label for="tokenInput">访问令牌</label>
-                <input id="tokenInput" placeholder="请输入访问令牌以继续" type="text">
-            </div>
-            <p id="loginError" style="color: #ef4444; margin-top: 10px; display: none;"></p>
-        </div>
-        <div class="modal-footer">
-            <button class="button button-primary" id="verifyTokenButton">验证</button>
-        </div>
-    </div>
-</div>
-
 <div id="app">
     <!-- 侧边栏 -->
     <aside class="sidebar">
@@ -288,8 +269,7 @@
 <!-- 通知 -->
 <div class="toast-container" id="toastContainer"></div>
 
-<script src="/static/js/api.js"></script>
-<script src="/static/js/components.js"></script>
-<script src="/static/js/app.js"></script>
+<script src="./components.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
