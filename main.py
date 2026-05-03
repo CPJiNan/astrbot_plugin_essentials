@@ -25,6 +25,7 @@ class EssentialsPlugin(Star):
         if self.config.get("permission", {}).get("enabled", True):
             self.permission_api = PermissionAPI(self, self.config)
             self.context.essentials_permission_api = self.permission_api
+            register_api(self.context, self.permission_api)
 
         if self.config.get("placeholder", {}).get("enabled", True):
             self.placeholder_api = PlaceholderAPI(self.config)
@@ -39,7 +40,6 @@ class EssentialsPlugin(Star):
             await self.permission_api.initialize()
             self.permission_proxy = PermissionProxy(self.permission_api, self.context, self.config)
             self.permission_proxy.inject()
-            register_api(self.context, self.permission_api)
         if self.placeholder_api:
             await self.placeholder_api.initialize()
             if self.permission_api:

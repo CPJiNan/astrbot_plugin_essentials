@@ -1,3 +1,5 @@
+import {Components} from './components.js';
+
 /**
  * Essentials
  * astrbot_plugin_essentials
@@ -7,7 +9,6 @@
  * @author 季楠
  * @since 2026/4/23 20:25
  */
-/*global API, Components*/
 const App = {
     bridge: null,
     currentTab: 'users',
@@ -201,7 +202,7 @@ const App = {
         }
 
         filtered.forEach(user => {
-            Components.renderUserItem(user, container, user.user_id === this.currentUser?.user_id);
+            Components.renderUserItem(user, container, user.user_id === this.currentUser?.user_id, this.selectUser.bind(this));
         });
     },
 
@@ -222,7 +223,7 @@ const App = {
         }
 
         filtered.forEach(group => {
-            Components.renderGroupItem(group, container, group.name === this.currentGroup?.name);
+            Components.renderGroupItem(group, container, group.name === this.currentGroup?.name, this.selectGroup.bind(this));
         });
     },
 
@@ -557,7 +558,7 @@ const App = {
 
         try {
             for (const {node, session} of permissions) {
-                await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions/' + encodeURIComponent(node) + '/delete', {session});
+                await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/permissions/${encodeURIComponent(node)}/delete`, {session});
             }
             Components.showToast(`已移除权限组 ${permissions.length} 个权限`);
             await this.selectGroup(this.currentGroup.name);

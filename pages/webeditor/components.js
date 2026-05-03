@@ -7,8 +7,7 @@
  * @author 季楠
  * @since 2026/4/23 20:45
  */
-/*global App*/
-const Components = {
+export const Components = {
     _renderListItem(type, id, name, isActive) {
         const div = document.createElement('div');
         div.className = `list-item${isActive ? ' active' : ''}`;
@@ -20,7 +19,7 @@ const Components = {
         return div;
     },
 
-    renderUserItem(user, container, isActive = false) {
+    renderUserItem(user, container, isActive, onSelect) {
         const div = this._renderListItem('user', user.user_id, user.user_id, isActive);
         if (user.permissions?.length > 0) {
             const badge = document.createElement('span');
@@ -28,13 +27,13 @@ const Components = {
             badge.textContent = String(user.permissions.length);
             div.appendChild(badge);
         }
-        div.addEventListener('click', () => App.selectUser(user.user_id));
+        div.addEventListener('click', () => onSelect(user.user_id));
         container.appendChild(div);
     },
 
-    renderGroupItem(group, container, isActive = false) {
+    renderGroupItem(group, container, isActive, onSelect) {
         const div = this._renderListItem('group', group.name, group.display || group.name, isActive);
-        div.addEventListener('click', () => App.selectGroup(group.name));
+        div.addEventListener('click', () => onSelect(group.name));
         container.appendChild(div);
     },
 
