@@ -15,6 +15,7 @@ from .webeditor import WebEditor
 class EssentialsPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
+        self.context = context
         self.config = config
         self.permission_api: Optional[PermissionAPI] = None
         self.permission_proxy: Optional[PermissionProxy] = None
@@ -37,7 +38,7 @@ class EssentialsPlugin(Star):
     async def initialize(self):
         if self.permission_api:
             await self.permission_api.initialize()
-            self.permission_proxy = PermissionProxy(self.permission_api, self.config)
+            self.permission_proxy = PermissionProxy(self.permission_api, self.context, self.config)
             self.permission_proxy.inject()
         if self.placeholder_api:
             await self.placeholder_api.initialize()

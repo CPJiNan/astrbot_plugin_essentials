@@ -4,13 +4,15 @@ from typing import Any, Dict, List
 
 from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import AstrMessageEvent
+from astrbot.api.star import Context
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.pipeline.waking_check.stage import WakingCheckStage
 
 
 class PermissionProxy:
-    def __init__(self, permission_api, config: AstrBotConfig):
+    def __init__(self, permission_api, context: Context, config: AstrBotConfig):
         self.permission_api = permission_api
+        self.context = context
         self.enabled: bool = config.get("permission", {}).get("proxy", {}).get("enabled", False)
         self.rules: List[PermissionProxyRule] = []
         self._process = None
@@ -24,7 +26,7 @@ class PermissionProxy:
         logger.info(f"已加载 {len(self.rules)} 条权限代理规则。")
 
     async def check(self, event: AstrMessageEvent) -> bool:
-        if event.is_admin():
+        if event.get_sender_id() in self.context.get_config().get("admins_id", []):
             return True
         if not self.enabled:
             return True
