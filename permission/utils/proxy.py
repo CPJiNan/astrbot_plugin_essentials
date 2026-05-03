@@ -9,12 +9,12 @@ from astrbot.api.event import AstrMessageEvent
 class PermissionProxy:
     def __init__(self, permission_api, config: AstrBotConfig):
         self.permission_api = permission_api
-        self.enabled: bool = config.get("proxy", {}).get("enabled", True)
+        self.enabled: bool = config.get("permission", {}).get("proxy", {}).get("enabled", True)
         self.rules: List[PermissionProxyRule] = []
         self._load_rules(config)
 
     def _load_rules(self, config: AstrBotConfig):
-        rules = config.get("proxy", {}).get("rules", [])
+        rules = config.get("permission", {}).get("proxy", {}).get("rules", [])
         for rule in rules:
             self.rules.append(PermissionProxyRule.from_dict(rule))
         logger.info(f"已加载 {len(self.rules)} 条权限代理规则。")
