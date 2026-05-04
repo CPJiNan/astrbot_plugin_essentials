@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 from astrbot.api import logger, AstrBotConfig
 from astrbot.api.event import AstrMessageEvent
 from astrbot.api.star import Context
+from astrbot.core.message.components import Plain, At
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.pipeline.waking_check.stage import WakingCheckStage
 
@@ -30,7 +31,13 @@ class PermissionProxy:
             return True
         if not self.enabled:
             return True
-        message = event.message_str
+        messages = []
+        for component in event.get_messages():
+            if isinstance(component, Plain):
+                messages.append(component.text)
+            elif isinstance(component, At):
+                messages.append(f"@{component.name} ")
+        message = "".join(messages)
         if not message:
             return True
         for rule in self.rules:
