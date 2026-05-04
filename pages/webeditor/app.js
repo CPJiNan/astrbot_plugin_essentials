@@ -395,6 +395,8 @@ const App = {
     async deleteUser() {
         if (!this.currentUser) return;
 
+        this.elements.confirmModal.classList.remove('active');
+
         if (!await this.confirm(`确定要删除用户 ${this.currentUser.user_id} 吗？`)) return;
 
         try {
@@ -613,6 +615,8 @@ const App = {
 
     async deleteGroup() {
         if (!this.currentGroup) return;
+
+        this.elements.confirmModal.classList.remove('active');
 
         if (!await this.confirm(`确定要删除权限组 ${this.currentGroup.name} 吗？`)) return;
 
