@@ -1,6 +1,6 @@
 [project]
 name = "Essentials"
-version = "1.0.6"
+version = "1.0.7"
 requires-python = ">=3.12"
 dependencies = [
     "astrbot",
