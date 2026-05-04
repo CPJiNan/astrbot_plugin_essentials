@@ -687,6 +687,10 @@ const App = {
     },
 
     confirm(message) {
+        if (this._confirmResolve) {
+            this._confirmResolve(false);
+            this._confirmResolve = null;
+        }
         return new Promise(resolve => {
             document.getElementById('confirmModalMessage').textContent = message;
             this._confirmResolve = resolve;
