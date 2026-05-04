@@ -244,7 +244,7 @@ const App = {
      */
     async selectUser(userId) {
         try {
-            this.currentUser = await this.bridge.apiGet('users/' + encodeURIComponent(userId));
+            this.currentUser = await this.bridge.apiGet(`users/${encodeURIComponent(userId)}`);
             this.currentGroup = null;
 
             this.elements.groupView.classList.add('hidden');
@@ -305,7 +305,7 @@ const App = {
      */
     async selectGroup(groupName) {
         try {
-            this.currentGroup = await this.bridge.apiGet('groups/' + encodeURIComponent(groupName));
+            this.currentGroup = await this.bridge.apiGet(`groups/${encodeURIComponent(groupName)}`);
             this.currentUser = null;
 
             this.elements.userView.classList.add('hidden');
@@ -398,7 +398,7 @@ const App = {
         if (!await this.confirm(`确定要删除用户 ${this.currentUser.user_id} 吗？`)) return;
 
         try {
-            await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/delete');
+            await this.bridge.apiPost(`users/${encodeURIComponent(this.currentUser.user_id)}/delete`);
             Components.showToast('用户删除成功');
             this.currentUser = null;
             this.elements.userView.classList.add('hidden');
@@ -419,7 +419,7 @@ const App = {
         }
 
         try {
-            await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/groups/' + encodeURIComponent(groupName));
+            await this.bridge.apiPost(`users/${encodeURIComponent(this.currentUser.user_id)}/groups/${encodeURIComponent(groupName)}`);
             Components.showToast('新增用户权限组成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
@@ -430,7 +430,7 @@ const App = {
 
     async removeUserFromGroup(userId, groupName) {
         try {
-            await this.bridge.apiPost('users/' + encodeURIComponent(userId) + '/groups/' + encodeURIComponent(groupName) + '/delete');
+            await this.bridge.apiPost(`users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupName)}/delete`);
             Components.showToast('移除用户权限组成功');
             await this.selectUser(userId);
             await this.loadUsers();
@@ -472,7 +472,7 @@ const App = {
 
         try {
             if (this.permissionModalType === 'user') {
-                await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions', {
+                await this.bridge.apiPost(`users/${encodeURIComponent(this.currentUser.user_id)}/permissions`, {
                     node,
                     value,
                     priority,
@@ -483,7 +483,7 @@ const App = {
                 Components.showToast('新增用户权限成功');
                 await this.selectUser(this.currentUser.user_id);
             } else {
-                await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions', {
+                await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/permissions`, {
                     node,
                     value,
                     priority,
@@ -502,7 +502,7 @@ const App = {
 
     async deleteUserPermission(node, session) {
         try {
-            await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions/' + encodeURIComponent(node) + '/delete', {session: session || null});
+            await this.bridge.apiPost(`users/${encodeURIComponent(this.currentUser.user_id)}/permissions/${encodeURIComponent(node)}/delete`, {session: session || null});
             Components.showToast('移除用户权限成功');
             await this.selectUser(this.currentUser.user_id);
             await this.loadUsers();
@@ -513,7 +513,7 @@ const App = {
 
     async deleteGroupPermission(node, session) {
         try {
-            await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/permissions/' + encodeURIComponent(node) + '/delete', {session: session || null});
+            await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/permissions/${encodeURIComponent(node)}/delete`, {session: session || null});
             Components.showToast('移除权限组权限成功');
             await this.selectGroup(this.currentGroup.name);
             await this.loadGroups();
@@ -549,7 +549,7 @@ const App = {
 
         try {
             for (const {node, session} of permissions) {
-                await this.bridge.apiPost('users/' + encodeURIComponent(this.currentUser.user_id) + '/permissions/' + encodeURIComponent(node) + '/delete', {session});
+                await this.bridge.apiPost(`users/${encodeURIComponent(this.currentUser.user_id)}/permissions/${encodeURIComponent(node)}/delete`, {session});
             }
             Components.showToast(`已移除用户 ${permissions.length} 个权限`);
             await this.selectUser(this.currentUser.user_id);
@@ -617,7 +617,7 @@ const App = {
         if (!await this.confirm(`确定要删除权限组 ${this.currentGroup.name} 吗？`)) return;
 
         try {
-            await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/delete');
+            await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/delete`);
             Components.showToast('权限组删除成功');
             this.currentGroup = null;
             this.elements.groupView.classList.add('hidden');
@@ -641,7 +641,7 @@ const App = {
         }
 
         try {
-            await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/update', {
+            await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/update`, {
                 name,
                 display,
                 weight,
@@ -668,7 +668,7 @@ const App = {
         }
 
         try {
-            await this.bridge.apiPost('groups/' + encodeURIComponent(this.currentGroup.name) + '/parents/' + encodeURIComponent(parentName));
+            await this.bridge.apiPost(`groups/${encodeURIComponent(this.currentGroup.name)}/parents/${encodeURIComponent(parentName)}`);
             Components.showToast('新增父权限组成功');
             await this.selectGroup(this.currentGroup.name);
         } catch (e) {
@@ -678,7 +678,7 @@ const App = {
 
     async removeGroupParent(groupName, parentName) {
         try {
-            await this.bridge.apiPost('groups/' + encodeURIComponent(groupName) + '/parents/' + encodeURIComponent(parentName) + '/delete');
+            await this.bridge.apiPost(`groups/${encodeURIComponent(groupName)}/parents/${encodeURIComponent(parentName)}/delete`);
             Components.showToast('移除父权限组成功');
             await this.selectGroup(groupName);
         } catch (e) {
