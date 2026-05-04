@@ -152,11 +152,8 @@ export const Components = {
             setTimeout(() => {
                 toast.style.opacity = '0';
                 toast.style.transform = 'translateX(100%)';
-                const remove = () => {
-                    toast.remove();
-                };
-                toast.addEventListener('transitionend', remove, {once: true});
-                setTimeout(remove, 1000);
+                toast.addEventListener('transitionend', () => toast.remove(), {once: true});
+                setTimeout(() => toast.remove(), 1000);
             }, 3000);
         });
     },
